@@ -127,3 +127,17 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# images
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.tiff
+*.gif
+
+# backup
+backup
+
+# Pycharm settings
+.idea

@@ -1,0 +1,206 @@
+# import psycopg2
+from sqlalchemy.dialects.postgresql import psycopg2
+
+from dao.category_dao import CategoryDAO
+from dao.course_dao import CourseDAO
+from dao.curriculum_item_dao import CurriculumItemDAO
+from dao.instructor_dao import InstructorDAO
+from dao.language_dao import LanguageDAO
+from dao.subcategory_dao import SubcategoryDAO
+from dao.topic_dao import TopicDAO
+from scrappers.course_coupons.smartybro_scrapper import SmartyBroScrapper
+from scrappers.course_coupons.udemy_scrapper import UdemyScrapper
+from utils.utils_functions import (log, log_with_timestamp, log_exception, download_image, try_save,
+                                   load_data_into_dict, put_if_not_null)
+from datetime import datetime
+
+
+class ScrapperRunner:
+    def __init__(self):
+        self.language_dao = LanguageDAO()
+        self.category_dao = CategoryDAO()
+        self.subcategory_dao = SubcategoryDAO()
+        self.topic_dao = TopicDAO()
+        self.instructor_dao = InstructorDAO()
+        self.curriculum_item_dao = CurriculumItemDAO()
+        self.course_dao = CourseDAO()
+        # cache
+        self._courses = load_data_into_dict(self.course_dao, "udemy_url")
+        self._languages = load_data_into_dict(self.language_dao, "name")
+        self._categories = load_data_into_dict(self.category_dao, "name")
+        self._subcategories = load_data_into_dict(self.subcategory_dao, "name")
+        self._topics = load_data_into_dict(self.topic_dao, "name")
+        self._instructors = load_data_into_dict(self.instructor_dao, "udemy_id")
+        self._curriculum = _load_curriculum(self.curriculum_item_dao)
+        self.smartybro_scrapper = SmartyBroScrapper()
+        self.udemy_scrapper = UdemyScrapper()
+
+    def scrape_all_on_smartybro_page(self, page_no):
+        courses = self.smartybro_scrapper.find_host_and_udemy_urls_for_page(page_no)
+        # do not scrape courses that're already scrapped
+        courses_to_scrape = {title: data for title, data in courses.items() if data["udemy_url"] not in self._courses}
+        return self.scrape_courses_on_udemy(courses_to_scrape)
+
+    def scrape_courses_on_udemy(self, courses):
+        num_of_new_courses = 0
+        for course, data in courses.items():
+            udemy_url = data["udemy_url"]
+            log_with_timestamp(f"<<<Fetching the details about the course with title = {course}>>>")
+            page_content = self.udemy_scrapper.get_page_content(udemy_url)
+            if page_content is None:
+                log_with_timestamp(f"WARNING: Cannot fetch the data from the Udemy for the course with native"
+                                   f" url={udemy_url}", "error")
+                continue
+            udemy_id = self.udemy_scrapper.find_udemy_course_id(page_content)
+            course = self._courses.get(udemy_url)
+            # convert to constant -> 2 to constant
+            course_is_new_or_updated = True if course is None else (datetime.utcnow() - course.updated_at).days > 2
+            if course_is_new_or_updated:
+                course_details = self.udemy_scrapper.find_course_details(udemy_id)
+
+                # get details needed for creating/finding objects
+                language_name = course_details.get("basic_data", {}).get("language")
+                category_name = course_details.get("basic_data", {}).get("category")
+                subcategory_name = course_details.get("basic_data", {}).get("subcategory")
+                topic_name = course_details.get("basic_data", {}).get("topic")
+                instructors_details = course_details.get("instructors", {})
+
+                language = self._languages.get(language_name)
+                category = self._categories.get(category_name)
+                subcategory = self._subcategories.get(subcategory_name)
+                topic = self._topics.get(topic_name)
+
+                # TODO:
+                if language is None:
+                    language = self._try_save_language(language_name)
+                    put_if_not_null(self._languages, language_name, language)
+                if category is None:
+                    category = self._try_save_category(category_name)
+                    put_if_not_null(self._categories, category_name, category)
+
+                if subcategory is None:
+                    subcategory = self._try_save_subcategory(subcategory_name, category)
+                    put_if_not_null(self._subcategories, subcategory_name, subcategory)
+
+                if topic is None:
+                    topic = self._try_save_topic(topic_name)
+                    put_if_not_null(self._topics, topic_name, topic)
+                instructors = []
+                for instructor_data in instructors_details:
+                    instructor = self._instructors.get(instructor_data['udemy_id'])
+                    if instructor is None:
+                        instructor = self._try_save_instructor(instructor_data)
+                        if instructor is not None:
+                            instructors.append(instructor)
+                            self._instructors[instructor.udemy_id] = instructor
+
+                incentives = course_details["incentives"]
+                headline_data = course_details["headline_data"]
+                price_details = course_details["price_details"]
+                ratings = {f'rating_count_{key}': value for key, value in course_details["ratings"].items()}
+                to_update = course is not None
+                course = self._try_save_course(course,
+                                               **{**incentives, **headline_data, **price_details, **ratings, **data,
+                                                  "udemy_id": udemy_id})
+                if course is not None:
+                    course.category = category
+                    course.subcategory = subcategory
+                    course.language = language
+                    course.topic = topic
+                    course.instructors = instructors
+                    try:
+                        self.course_dao.update()
+                    except Exception as e:
+                        log_with_timestamp(f"FATAL ERROR: {e}", "error")
+                        continue
+                    if not to_update:
+                        self._try_save_curriculum(course_details["curriculum"], course.id)
+                    num_of_new_courses += 1
+                    self._courses[course.udemy_url] = course
+
+        return num_of_new_courses
+
+    # private fetching methods for communication with DAO
+    def _try_save_subcategory(self, subcategory_name, category):
+        if subcategory_name is None:
+            return None
+        subcategory = None
+        try:
+            subcategory = self.subcategory_dao.find_by_name(subcategory_name)
+            if subcategory is None:
+                subcategory = self.subcategory_dao.create(subcategory_name, category)
+        except Exception as e:
+            log_exception(e, "Subcategory")
+        finally:
+            return subcategory
+
+    def _try_save_instructor(self, details):
+        instructor = None
+        try:
+            image_url = details.get("original_image_url")
+            instructor = self.instructor_dao.create(**details)
+            image_path = None
+            try:
+                image_path = download_image(image_url, "instructor")
+            except Exception as e:
+                log(f"Instructor image cannot be fetched - reason: {e}", "error")
+
+            instructor.image_path = image_path
+            instructor = self.instructor_dao.save(instructor)
+        except Exception as e:
+            log_exception(e, "Instructor")
+        finally:
+            return instructor
+
+    def _try_save_course(self, course=None, **data):
+        try:
+            if course is None:
+                course = self.course_dao.create(**data)
+            else:
+                course = self.course_dao.update(course, **data)
+            poster_url = data.get('poster_url')
+            if poster_url is not None:
+                try:
+                    poster_filepath = download_image(poster_url)
+                except Exception as e:
+                    log(f"Course poster cannot be fetched - reason: {e}", "error")
+            course.image_path = poster_filepath
+            # NOTE: will be persisted in course update
+        except Exception as e:
+            log_exception(e, "Course")
+        finally:
+            return course
+
+    def _try_save_language(self, language_name):
+        if language_name is not None:
+            return try_save(self.language_dao.create, language_name, None, "Language")
+        return None
+
+    def _try_save_category(self, category_name):
+        category = None
+        if category_name is not None:
+            return try_save(self.category_dao.create, category_name, None, "Category")
+        return category
+
+    def _try_save_topic(self, topic_name):
+        topic = None
+        if topic_name is not None:
+            return try_save(self.topic_dao.create, topic_name, None, "Topic")
+        return topic
+
+    def _try_save_curriculum(self, curriculum_details, course_id):
+        for i in range(len(curriculum_details)):
+            curriculum_details[i].update(**{"course_id": course_id})
+        return try_save(self.curriculum_item_dao.create_in_batch, curriculum_details, [], "Curriculum item")
+
+
+# helpers
+def _load_curriculum(dao):
+    all_records = dao.find_all()
+    course_items = {}
+    for item in all_records:
+        course_id = item.course_id
+        if course_id not in course_items:
+            course_items[course_id] = []
+        course_items[course_id].append(item)
+    return course_items
