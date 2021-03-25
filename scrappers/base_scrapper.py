@@ -3,7 +3,7 @@ from typing import List
 from requests.exceptions import ConnectionError
 from requests import get
 from bs4 import BeautifulSoup
-from constants.course_coupons import COMMON_HEADERS
+from constants.constants import COMMON_HEADERS
 from utils.utils_functions import log, log_with_timestamp
 
 

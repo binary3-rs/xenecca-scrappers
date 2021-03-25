@@ -7,9 +7,8 @@ class CourseDAO:
     def __init__(self):
         self._session = session
 
-    # def find_by_name(self, name):
-    #     return self._session.query(Category).filter_by(name=name)
-
+    def find(self, id):
+        return
     def create(self, **kwargs):
         course = Course(**kwargs)
         return self.save(course)

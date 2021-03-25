@@ -4,7 +4,7 @@ from scrappers.base_scrapper import BaseScrapper
 from typing import List
 from json import loads
 
-from constants.course_coupons import SMARTY_BRO_BASE_URL
+from constants.constants import SMARTY_BRO_BASE_URL
 
 
 class SmartyBroScrapper(BaseScrapper):

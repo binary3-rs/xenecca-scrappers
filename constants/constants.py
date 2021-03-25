@@ -175,3 +175,11 @@ LANDING_COMPONENTS = {"prefix": "https://www.udemy.com/api-2.0/course-landing-co
 
 COURSE_DATA = {"prefix": "https://www.udemy.com/api-2.0/courses/",
                "suffix": "?fields[course]=primary_category,primary_subcategory,context_info,locale"}
+
+
+# elastic search data
+from os import getenv
+
+ES_PORT = getenv('ES_PORT', 9200)
+ES_COURSES_INDEX = getenv('ES_COURSES_INDEX', 'course')
+COURSES_ES_ENDPOINT = f'http://localhost:{ES_PORT}/{ES_COURSES_INDEX}/_doc/'

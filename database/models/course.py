@@ -32,7 +32,10 @@ class Course(Base):
     discount_code = db.Column(db.String(40))
     duration_in_mins = db.Column(db.Integer, default=0)
     goals = db.Column(db.Text(1000))
+    headline = db.Column(db.String(255))
     image_path = db.Column(db.String)
+    is_coupon_active = db.Column(db.Boolean, default=True)
+    is_archived = db.Column(db.Boolean, default=False)
     has_lifetime_access = db.Column(db.Boolean)
     num_of_articles = db.Column(db.Integer, default=1)
     num_of_reviews = db.Column(db.Integer, default=0)
@@ -98,6 +101,7 @@ class Course(Base):
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+        self.is_coupon_active = True
         return self
 
     def __str__(self):

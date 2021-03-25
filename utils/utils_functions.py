@@ -4,7 +4,7 @@ from os import path, sep
 from logging import debug, info, warning, error
 from datetime import datetime, timezone
 
-from constants.course_coupons import LANDING_COMPONENTS, COURSE_DATA
+from constants.constants import LANDING_COMPONENTS, COURSE_DATA
 from constants.config import COURSES_MEDIA_DIR_PATH
 from database.sqlalchemy_extension import db
 
@@ -89,7 +89,7 @@ def try_save(fn, data, default_value=None, message_subject=""):
         return result
 
 
-def log_exception(e, message_subject):
+def log_exception(e, message_subject=None):
     if isinstance(e, db.exc.InvalidRequestError) or isinstance(e, db.exc.IntegrityError):
         log_with_timestamp(f"ERROR: {message_subject} cannot be saved. Data integrity error: {e}.", "error")
     elif isinstance(e, db.exc.ProgrammingError):
@@ -108,3 +108,5 @@ def load_data_into_dict(dao, key="name"):
 def put_if_not_null(collection, key, value):
     if key is not None:
         collection[key] = value
+
+

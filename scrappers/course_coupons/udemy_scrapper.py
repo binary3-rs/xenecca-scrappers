@@ -101,10 +101,12 @@ class UdemyScrapper(BaseScrapper):
     def find_course_basic_info(self, data):
         if data is None:
             return {}
-        primary_category = data.get("primary_category", {}).get("title")
+        primary_category = data.get("primary_category", {}).get("title") # TODO: maybe to add title cleaned
         primary_subcategory = data.get("primary_subcategory", {}).get("title")
         language = data.get("locale", {}).get("simple_english_title")
-        topic = data.get("context_info", {}).get("label", {}).get("display_name")
+        topic = data.get("context_info", {}).get("label", {})
+        if topic is not None:
+            topic = topic.get("display_name")
         return {"category": primary_category, "subcategory": primary_subcategory, "language": language, "topic": topic}
 
     def find_course_curriculum(self, data):
@@ -149,7 +151,7 @@ class UdemyScrapper(BaseScrapper):
         ratings = data.get("ratingDistribution", {})
         return {rating['rating']: rating['count'] for rating in ratings}
 
-    def find_udemy_course_id(self, content):
+    def find_udemy_course_id_and_headline(self, content):
         """
         Finds id of the udemy course
         :param content: HTML content of the page we're scrapping
@@ -158,7 +160,10 @@ class UdemyScrapper(BaseScrapper):
         results = super()._find_content_on_page(content, 'body')
         body_element = results[0] if len(results) else None
         udemy_id = body_element.attrs['data-clp-course-id'] if body_element else None
-        return udemy_id
+        headline_data_el = super()._find_content_on_page(content, 'h1', 'udlite-heading-xl clp-lead__title '
+                                                                        'clp-lead__title--small')
+        headline_data = headline_data_el[0].text if len(headline_data_el) > 0 else ''
+        return udemy_id, headline_data
 
     # API calls
     def _fetch_udemy_data(self, course_id, target):

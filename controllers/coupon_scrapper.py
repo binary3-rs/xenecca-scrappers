@@ -1,7 +1,5 @@
-# import psycopg2
-from sqlalchemy.dialects.postgresql import psycopg2
-
 from dao.category_dao import CategoryDAO
+from dao.course_coupon_dao import CourseCouponDAO
 from dao.course_dao import CourseDAO
 from dao.curriculum_item_dao import CurriculumItemDAO
 from dao.instructor_dao import InstructorDAO
@@ -12,6 +10,7 @@ from scrappers.course_coupons.smartybro_scrapper import SmartyBroScrapper
 from scrappers.course_coupons.udemy_scrapper import UdemyScrapper
 from utils.utils_functions import (log, log_with_timestamp, log_exception, download_image, try_save,
                                    load_data_into_dict, put_if_not_null)
+from utils.elasticsearch import _convert_course_object_to_es_record
 from datetime import datetime
 
 
@@ -24,6 +23,7 @@ class ScrapperRunner:
         self.instructor_dao = InstructorDAO()
         self.curriculum_item_dao = CurriculumItemDAO()
         self.course_dao = CourseDAO()
+        self.coupon_dao = CourseCouponDAO()
         # cache
         self._courses = load_data_into_dict(self.course_dao, "udemy_url")
         self._languages = load_data_into_dict(self.language_dao, "name")
@@ -51,7 +51,9 @@ class ScrapperRunner:
                 log_with_timestamp(f"WARNING: Cannot fetch the data from the Udemy for the course with native"
                                    f" url={udemy_url}", "error")
                 continue
-            udemy_id = self.udemy_scrapper.find_udemy_course_id(page_content)
+            udemy_id, headline = self.udemy_scrapper.find_udemy_course_id_and_headline(page_content)
+            if headline:
+                headline = headline.strip()
             course = self._courses.get(udemy_url)
             # convert to constant -> 2 to constant
             course_is_new_or_updated = True if course is None else (datetime.utcnow() - course.updated_at).days > 2
@@ -95,7 +97,7 @@ class ScrapperRunner:
                             self._instructors[instructor.udemy_id] = instructor
 
                 incentives = course_details["incentives"]
-                headline_data = course_details["headline_data"]
+                headline_data = {**course_details["headline_data"], "headline": headline}
                 price_details = course_details["price_details"]
                 ratings = {f'rating_count_{key}': value for key, value in course_details["ratings"].items()}
                 to_update = course is not None
@@ -103,6 +105,7 @@ class ScrapperRunner:
                                                **{**incentives, **headline_data, **price_details, **ratings, **data,
                                                   "udemy_id": udemy_id})
                 if course is not None:
+
                     course.category = category
                     course.subcategory = subcategory
                     course.language = language
@@ -110,6 +113,8 @@ class ScrapperRunner:
                     course.instructors = instructors
                     try:
                         self.course_dao.update()
+                        print("HELLO")
+                        print(_convert_course_object_to_es_record(course))
                     except Exception as e:
                         log_with_timestamp(f"FATAL ERROR: {e}", "error")
                         continue
@@ -159,6 +164,7 @@ class ScrapperRunner:
             else:
                 course = self.course_dao.update(course, **data)
             poster_url = data.get('poster_url')
+            poster_filepath = None
             if poster_url is not None:
                 try:
                     poster_filepath = download_image(poster_url)

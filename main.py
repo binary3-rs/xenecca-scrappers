@@ -9,7 +9,7 @@ if __name__ == "__main__":
     log(f"-----------Scrape results for the date: {datetime.utcnow()})-----------")
     page_no = 1  # NOTE: for possible page-wise scrape
     try:
-        num_of_scrapped_courses = runner.scrape_all_on_smartybro_page(1)
+        num_of_scrapped_courses = runner.scrape_all_on_smartybro_page(page_no)
         log_with_timestamp(f"{num_of_scrapped_courses} new courses added.")
     except Exception as e:
         log_exception(e)
