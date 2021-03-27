@@ -54,7 +54,10 @@ class UdemyScrapper(BaseScrapper):
             list_price = pricing_result.get("list_price")
             if list_price:
                 return {"discount_code": pricing_result.get("code"),
-                        "price_as_string": list_price.get("price_string"),
+                        "price": pricing_result.get("price", {}).get("amount", 0),
+                        "old_price": list_price.get("amount", 0),
+                        "currency": pricing_result.get("price", {}).get("currency_symbol", '$'),
+                        #"price_as_string": list_price.get("price_string"),
                         "discount_percent": pricing_result.get("discount_percent_for_display", 0)
                         }
         return {}
@@ -160,10 +163,9 @@ class UdemyScrapper(BaseScrapper):
         results = super()._find_content_on_page(content, 'body')
         body_element = results[0] if len(results) else None
         udemy_id = body_element.attrs['data-clp-course-id'] if body_element else None
-        headline_data_el = super()._find_content_on_page(content, 'h1', 'udlite-heading-xl clp-lead__title '
-                                                                        'clp-lead__title--small')
-        headline_data = headline_data_el[0].text if len(headline_data_el) > 0 else ''
-        return udemy_id, headline_data
+        headline_el = super()._find_content_on_page(content, 'div', 'udlite-text-md clp-lead__headline')
+        headline = headline_el[0].text if len(headline_el) > 0 else ''
+        return udemy_id, headline
 
     # API calls
     def _fetch_udemy_data(self, course_id, target):

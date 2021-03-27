@@ -181,5 +181,5 @@ COURSE_DATA = {"prefix": "https://www.udemy.com/api-2.0/courses/",
 from os import getenv
 
 ES_PORT = getenv('ES_PORT', 9200)
-ES_COURSES_INDEX = getenv('ES_COURSES_INDEX', 'course')
+ES_COURSES_INDEX = getenv('ES_COURSES_INDEX', 'xenecca-course')
 COURSES_ES_ENDPOINT = f'http://localhost:{ES_PORT}/{ES_COURSES_INDEX}/_doc/'

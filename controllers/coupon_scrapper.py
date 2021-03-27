@@ -10,7 +10,7 @@ from scrappers.course_coupons.smartybro_scrapper import SmartyBroScrapper
 from scrappers.course_coupons.udemy_scrapper import UdemyScrapper
 from utils.utils_functions import (log, log_with_timestamp, log_exception, download_image, try_save,
                                    load_data_into_dict, put_if_not_null)
-from utils.elasticsearch import _convert_course_object_to_es_record
+from utils.elasticsearch import _convert_course_object_to_es_record, store_course_in_es_index
 from datetime import datetime
 
 
@@ -105,7 +105,6 @@ class ScrapperRunner:
                                                **{**incentives, **headline_data, **price_details, **ratings, **data,
                                                   "udemy_id": udemy_id})
                 if course is not None:
-
                     course.category = category
                     course.subcategory = subcategory
                     course.language = language
@@ -113,8 +112,7 @@ class ScrapperRunner:
                     course.instructors = instructors
                     try:
                         self.course_dao.update()
-                        print("HELLO")
-                        print(_convert_course_object_to_es_record(course))
+                        store_course_in_es_index(course)
                     except Exception as e:
                         log_with_timestamp(f"FATAL ERROR: {e}", "error")
                         continue

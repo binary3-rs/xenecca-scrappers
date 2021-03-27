@@ -41,6 +41,7 @@ class Course(Base):
     num_of_reviews = db.Column(db.Integer, default=0)
     original_image_url = db.Column(db.String)
     price = db.Column(db.Numeric(precision=6, scale=2), default=0)
+    old_price = db.Column(db.Numeric(precision=6, scale=2), default=0)
     requirements = db.Column(db.Text(1000))
     smartybro_url = db.Column(db.String(300), unique=True, nullable=False)
     students_enrolled = db.Column(db.Integer, default=0)
