@@ -26,8 +26,10 @@ def _convert_course_object_to_es_record(course):
         "_class": "com.xenecca.api.es.models.CourseDoc",
         "title": course.title,
         "doc_id": course.id,
+        "badge": course.badge,
         "headline": course.headline,
         "price": float(course.price),
+        "old_price": float(course.old_price),
         "price_as_string": str(course.price) + str(course.currency),
         "avg_rating": str(course.avg_rating),
         "category": course.category.id,
@@ -40,7 +42,7 @@ def _convert_course_object_to_es_record(course):
         "num_of_students": course.num_of_students,
         "num_of_reviews": course.num_of_reviews,
         #"discount_period": course.discount_period,
-        "time_added": course.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
-        "authors": [{'full_name': instructor.full_name, "image": instructor.image_path} for instructor in
+        "time_updated": course.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+        "instructors": [{'full_name': instructor.full_name, "image": instructor.image_path} for instructor in
                     course.instructors]
     }
