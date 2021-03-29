@@ -18,8 +18,6 @@ class UdemyScrapper(BaseScrapper):
         curriculum = []
         discount_expiration = {}
         ratings = {}
-        # if not landing_data or not course_data:
-        #     return {}
         if 'price_text' in landing_data:
             price_details = self.find_course_price_details(landing_data['price_text'].get('data'))
         if 'incentives' in landing_data:
@@ -54,10 +52,9 @@ class UdemyScrapper(BaseScrapper):
             list_price = pricing_result.get("list_price")
             if list_price:
                 return {"discount_code": pricing_result.get("code"),
-                        "price": pricing_result.get("price", {}).get("amount", 0),
+                        "price": 0,  # NOTE: hardcoded pricing_result.get("price", {}).get("amount", 0),
                         "old_price": list_price.get("amount", 0),
                         "currency": pricing_result.get("price", {}).get("currency_symbol", '$'),
-                        #"price_as_string": list_price.get("price_string"),
                         "discount_percent": pricing_result.get("discount_percent_for_display", 0)
                         }
         return {}
@@ -65,10 +62,17 @@ class UdemyScrapper(BaseScrapper):
     def find_course_incentives(self, data):
         if data is None:
             return {}
-        fields = ("video_content_length", "has_assignments", "devices_access", "has_certificate",
-                  "has_lifetime_access", "num_articles", "num_additional_resources", "num_practice_tests",
-                  "num_coding_exercises")
-        return {key: data.get(key) for key in fields}
+        fields = {"video_content_length": ("video_content_length", 0),
+                  "has_assignments": ("has_assignments", False),
+                  "devices_access": ("devices_access", None),
+                  "has_certificate": ("has_certificate", True),
+                  "has_lifetime_access": ("has_lifetime_access", True),
+                  "num_of_articles": ("num_articles", 0)}
+                  #"num_additional_resources": ("num_additional_resources", 0),
+                  #"num_practice_tests": (,
+                  #"num_coding_exercises")
+
+        return {key: data.get(value[0], value[1]) for key, value in fields.items()}
 
     def find_course_instructors(self, data):
         if data is None:
@@ -97,8 +101,8 @@ class UdemyScrapper(BaseScrapper):
             "title": data.get("title"),
             "avg_rating": data.get("rating", 0.0),
             "badge": data.get("badge_family"),  # new, top_rated
-            "num_reviews": data.get("num_reviews", 0),
-            "num_students": data.get("num_students", 0)
+            "num_of_reviews": data.get("num_reviews", 0),
+            "num_of_students": data.get("num_students", 0)
         }
 
     def find_course_basic_info(self, data):
@@ -154,7 +158,7 @@ class UdemyScrapper(BaseScrapper):
         ratings = data.get("ratingDistribution", {})
         return {rating['rating']: rating['count'] for rating in ratings}
 
-    def find_udemy_course_id_and_headline(self, content):
+    def find_udemy_course_id(self, content):
         """
         Finds id of the udemy course
         :param content: HTML content of the page we're scrapping
@@ -163,9 +167,20 @@ class UdemyScrapper(BaseScrapper):
         results = super()._find_content_on_page(content, 'body')
         body_element = results[0] if len(results) else None
         udemy_id = body_element.attrs['data-clp-course-id'] if body_element else None
+        return udemy_id
+
+    def find_udemy_course_headline(self, content):
         headline_el = super()._find_content_on_page(content, 'div', 'udlite-text-md clp-lead__headline')
         headline = headline_el[0].text if len(headline_el) > 0 else ''
-        return udemy_id, headline
+        return headline
+
+    def find_udemy_course_price_with_discount(self, content):
+        pass
+        # NOTE: price cannot be extracted, calculated dynamically
+        # price_el = super()._find_content_on_page(content, 'div', 'udlite-clp-discount-price')
+        # #price_el = super()._find_content_on_page(content, 'Current price')
+        # price_el = super()._find_content_on_page(content, 'div', 'udlite-clp-percent-discount')
+        # print(price_el)
 
     # API calls
     def _fetch_udemy_data(self, course_id, target):

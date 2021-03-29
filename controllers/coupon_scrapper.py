@@ -10,7 +10,7 @@ from scrappers.course_coupons.smartybro_scrapper import SmartyBroScrapper
 from scrappers.course_coupons.udemy_scrapper import UdemyScrapper
 from utils.utils_functions import (log, log_with_timestamp, log_exception, download_image, try_save,
                                    load_data_into_dict, put_if_not_null)
-from utils.elasticsearch import _convert_course_object_to_es_record, store_course_in_es_index
+from utils.elasticsearch import store_course_in_es_index
 from datetime import datetime
 
 
@@ -45,13 +45,15 @@ class ScrapperRunner:
         num_of_new_courses = 0
         for course, data in courses.items():
             udemy_url = data["udemy_url"]
-            log_with_timestamp(f"<<<Fetching the details about the course with title = {course}>>>")
+            log_with_timestamp(f"<<< Fetching the details about the course with title = {course} >>>")
             page_content = self.udemy_scrapper.get_page_content(udemy_url)
             if page_content is None:
                 log_with_timestamp(f"WARNING: Cannot fetch the data from the Udemy for the course with native"
                                    f" url={udemy_url}", "error")
                 continue
-            udemy_id, headline = self.udemy_scrapper.find_udemy_course_id_and_headline(page_content)
+            udemy_id = self.udemy_scrapper.find_udemy_course_id(page_content)
+            headline = self.udemy_scrapper.find_udemy_course_headline(page_content)
+            price_with_discount = self.udemy_scrapper.find_udemy_course_price_with_discount(page_content)
             if headline:
                 headline = headline.strip()
             course = self._courses.get(udemy_url)
@@ -161,14 +163,14 @@ class ScrapperRunner:
                 course = self.course_dao.create(**data)
             else:
                 course = self.course_dao.update(course, **data)
-            poster_url = data.get('poster_url')
+            poster_url = data.get('original_poster_url')
             poster_filepath = None
             if poster_url is not None:
                 try:
                     poster_filepath = download_image(poster_url)
                 except Exception as e:
                     log(f"Course poster cannot be fetched - reason: {e}", "error")
-            course.image_path = poster_filepath
+            course.poster_path = poster_filepath
             # NOTE: will be persisted in course update
         except Exception as e:
             log_exception(e, "Course")

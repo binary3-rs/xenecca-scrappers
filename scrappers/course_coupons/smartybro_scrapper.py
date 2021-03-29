@@ -26,10 +26,10 @@ class SmartyBroScrapper(BaseScrapper):
             if udemy_url:
                 results[course_title] = {"smartybro_url": smartybro_url,
                                          "udemy_url": udemy_url,
-                                         "whatyoulllearn": whatyoulllearn,
+                                         "goals": whatyoulllearn,
                                          "requirements": requirements,
                                          "description": description,
-                                         "poster_url": poster
+                                         "original_poster_url": poster
                                          }
         return results
 

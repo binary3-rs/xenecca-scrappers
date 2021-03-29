@@ -15,7 +15,7 @@ class Course(Base):
     __tablename__ = "course"
     __table_args__ = (CheckConstraint('avg_rating >= 0 and avg_rating <= 5'), CheckConstraint('price >= 0'),
                       CheckConstraint('0 <= discount_percent <= 100'), CheckConstraint('0 <= duration_in_mins'),
-                      CheckConstraint('num_of_articles >= 1'), CheckConstraint('num_of_reviews >= 0'),
+                      CheckConstraint('num_of_articles >= 0'), CheckConstraint('num_of_reviews >= 0'),
                       CheckConstraint('students_enrolled >= 0'), CheckConstraint('rating_1 >= 0'),
                       CheckConstraint('rating_2 >= 0'), CheckConstraint('rating_3 >= 0'),
                       CheckConstraint('rating_4 >= 0'), CheckConstraint('rating_5 >= 0'))
@@ -26,25 +26,25 @@ class Course(Base):
     has_certificate = db.Column(db.Boolean)
     currency = db.Column(db.String(1))
     description = db.Column(db.Text(6000))
-    device_access = db.Column(db.String(40))
+    devices_access = db.Column(db.String(40))
     discount_percent = db.Column(db.Integer, default=0)
     discount_period = db.Column(db.String(40))
     discount_code = db.Column(db.String(40))
-    duration_in_mins = db.Column(db.Integer, default=0)
+    video_content_length = db.Column(db.String, default=0)
     goals = db.Column(db.Text(1000))
     headline = db.Column(db.String(255))
-    image_path = db.Column(db.String)
+    poster_path = db.Column(db.String)
     is_coupon_active = db.Column(db.Boolean, default=True)
     is_archived = db.Column(db.Boolean, default=False)
     has_lifetime_access = db.Column(db.Boolean)
     num_of_articles = db.Column(db.Integer, default=1)
     num_of_reviews = db.Column(db.Integer, default=0)
-    original_image_url = db.Column(db.String)
+    original_poster_url = db.Column(db.String)
     price = db.Column(db.Numeric(precision=6, scale=2), default=0)
     old_price = db.Column(db.Numeric(precision=6, scale=2), default=0)
     requirements = db.Column(db.Text(1000))
     smartybro_url = db.Column(db.String(300), unique=True, nullable=False)
-    students_enrolled = db.Column(db.Integer, default=0)
+    num_of_students = db.Column(db.Integer, default=0)
     title = db.Column(db.String(255), unique=True, nullable=False)
     udemy_id = db.Column(db.BigInteger, unique=True, nullable=False)
     udemy_url = db.Column(db.String(300), unique=True, nullable=False)

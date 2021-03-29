@@ -19,7 +19,6 @@ def _store_course_es_record(id, record):
             raise ValueError(res['error'])
     except Exception as e:
         log_with_timestamp(f"Creating a record failed. Error message = {e}.")
-        print(e)
 
 
 def _convert_course_object_to_es_record(course):
@@ -28,18 +27,20 @@ def _convert_course_object_to_es_record(course):
         "title": course.title,
         "doc_id": course.id,
         "headline": course.headline,
-        "price": str(course.price),
+        "price": float(course.price),
         "price_as_string": str(course.price) + str(course.currency),
         "avg_rating": str(course.avg_rating),
         "category": course.category.id,
         "subcategory": course.subcategory.id,
         "topic": course.topic.id,
         "language": course.language.id,
-        "image": course.image_path,
-        "original_image_url": course.original_image_url,
-        "students_enrolled": course.students_enrolled,
+        "poster": course.poster_path,
+        "original_poster_url": course.original_poster_url,
+        "video_content_length": course.video_content_length,
+        "num_of_students": course.num_of_students,
         "num_of_reviews": course.num_of_reviews,
-        "discount_period": course.discount_period,
+        #"discount_period": course.discount_period,
         "time_added": course.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
-        "authors": [{'name': instructor.full_name, "image": instructor.image_path} for instructor in course.instructors]
+        "authors": [{'full_name': instructor.full_name, "image": instructor.image_path} for instructor in
+                    course.instructors]
     }
