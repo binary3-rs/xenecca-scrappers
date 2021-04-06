@@ -122,6 +122,7 @@ class UdemyScrapper(BaseScrapper):
         sections = data.get("displayed_sections", [])
         lectures = []
         counter = 1
+
         for section in sections:
             items = section.get("items", [])
             lectures.append({
@@ -133,17 +134,18 @@ class UdemyScrapper(BaseScrapper):
                 "udemy_lesson_id": None,
                 "content_length": convert_duration_from_str_to_int(section.get("content_length_text")),
             })
-
+            item_counter = 1
             for item in items:
                 lectures.append({
                     "title": item.get("title"),
                     "item_type": item.get("item_type"),
                     "description": item.get("description"),
-                    "index": item.get("object_index", 0),
+                    "index": item_counter,#item.get("object_index", 0),
                     "section_index": counter,
                     "udemy_lesson_id": item.get("id", 0),
                     "content_length": convert_duration_from_str_to_int(item.get("content_summary")),
                 })
+                item_counter += 1
             counter += 1
         return lectures
 

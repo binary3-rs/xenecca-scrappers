@@ -22,6 +22,11 @@ def _store_course_es_record(id, record):
 
 
 def _convert_course_object_to_es_record(course):
+    course_duration = course.video_content_length
+    try:
+        duration = float(course_duration.split()[0])
+    except:
+        duration = 0
     return {
         "_class": "com.xenecca.api.es.models.CourseDoc",
         "title": course.title,
@@ -38,11 +43,10 @@ def _convert_course_object_to_es_record(course):
         "language": course.language.id,
         "poster": course.poster_path,
         "original_poster_url": course.original_poster_url,
-        "video_content_length": course.video_content_length,
+        "duration_in_hrs": duration,
         "num_of_students": course.num_of_students,
         "num_of_reviews": course.num_of_reviews,
-        #"discount_period": course.discount_period,
-        "time_updated": course.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+        "updated_at": course.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
         "instructors": [{'full_name': instructor.full_name, "image": instructor.image_path} for instructor in
-                    course.instructors]
+                        course.instructors]
     }

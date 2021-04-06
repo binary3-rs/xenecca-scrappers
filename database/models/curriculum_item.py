@@ -10,9 +10,10 @@ class CurriculumItem(Base):
     udemy_lesson_id = db.Column(db.BigInteger, unique=True, nullable=True, default=None)
     title = db.Column(db.String(255), nullable=False)
     item_type = db.Column(db.String(20))  # TODO: change to enum
-    index = db.Column(db.Integer, default=1)  # check if it is non-negative
-    section_index = db.Column(db.Integer, default=0)  # check if it is non-negative
-    content_length = db.Column(db.Integer, default=0)  # check if it is non-negative
+    index = db.Column(db.Integer, default=1)
+    section_index = db.Column(db.Integer)
+    description = db.Column(db.String(500), default=None)
+    content_length = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
