@@ -94,7 +94,5 @@ class SmartyBroScrapper(BaseScrapper):
 
     def _find_course_poster(self, content):
         poster_elements = super()._find_content_on_page(content, 'img', {'width': '480', 'height': '270'})
-        poster = poster_elements[0].attrs['data-src']
-        # if poster:
-        #     download_image(poster, COURSES_MEDIA_DIR_PATH)
+        poster = poster_elements[0].attrs['data-src'] if len(poster_elements) else None
         return poster

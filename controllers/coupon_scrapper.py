@@ -87,7 +87,7 @@ class ScrapperRunner:
                     put_if_not_null(self._subcategories, subcategory_name, subcategory)
 
                 if topic is None:
-                    topic = self._try_save_topic(topic_name)
+                    topic = self._try_save_topic(topic_name, subcategory)
                     put_if_not_null(self._topics, topic_name, topic)
                 instructors = []
                 for instructor_data in instructors_details:
@@ -106,6 +106,7 @@ class ScrapperRunner:
                 course = self._try_save_course(course,
                                                **{**incentives, **headline_data, **price_details, **ratings, **data,
                                                   "udemy_id": udemy_id})
+                print(category, subcategory, topic, course.id)
                 if course is not None:
                     course.category = category
                     course.subcategory = subcategory
@@ -127,7 +128,7 @@ class ScrapperRunner:
 
     # private fetching methods for communication with DAO
     def _try_save_subcategory(self, subcategory_name, category):
-        if subcategory_name is None:
+        if subcategory_name is None or category is None:
             return None
         subcategory = None
         try:
@@ -188,11 +189,18 @@ class ScrapperRunner:
             return try_save(self.category_dao.create, category_name, None, "Category")
         return category
 
-    def _try_save_topic(self, topic_name):
+    def _try_save_topic(self, topic_name, subcategory):
+        if topic_name is None or subcategory is None:
+            return None
         topic = None
-        if topic_name is not None:
-            return try_save(self.topic_dao.create, topic_name, None, "Topic")
-        return topic
+        try:
+            topic = self.topic_dao.find_by_name(topic_name)
+            if topic is None:
+                topic = self.topic_dao.create(topic_name, subcategory)
+        except Exception as e:
+            log_exception(e, "Topic")
+        finally:
+            return topic
 
     def _try_save_curriculum(self, curriculum_details, course_id):
         for i in range(len(curriculum_details)):

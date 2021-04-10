@@ -10,10 +10,10 @@ class TopicDAO:
         return self._session.query(Topic).all()
 
     def find_by_name(self, name):
-        return self._session.query(Topic).filter_by(name=name)
+        return self._session.query(Topic).filter_by(name=name).first()
 
-    def create(self, name):
-        return self.save(Topic(name))
+    def create(self, name, subcategory):
+        return self.save(Topic(name, subcategory))
 
     def save(self, topic) -> "Topic":
         """Add topic to database"""

@@ -16,13 +16,6 @@ class SubcategoryDAO:
     def create(self, name, category):
         subcategory = Subcategory(name, category)
         return self.save(subcategory)
-    #
-    # def find_or_create(self, name):
-    #     result = self.find_by_name(name)
-    #     if result is None:
-    #         subcategory = Subcategory(name)
-    #         result = self.save(subcategory)
-    #     return result
 
     def save(self, subcategory) -> "Subcategory":
         """Add subcategory to database"""

@@ -13,5 +13,4 @@ if __name__ == "__main__":
         log_with_timestamp(f"{num_of_scrapped_courses} new courses added.")
     except Exception as e:
         log_exception(e)
-    # TODO: add scraping of courses provided by users
     log(f"-----------END-----------")
