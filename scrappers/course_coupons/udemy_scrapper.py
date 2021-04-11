@@ -1,4 +1,6 @@
 from json import loads
+
+from constants.constants import CURRICULUM_ITEM_DESCRIPTION_LEN
 from scrappers.base_scrapper import BaseScrapper
 from utils.utils_functions import create_target_url, convert_duration_from_str_to_int
 
@@ -139,7 +141,7 @@ class UdemyScrapper(BaseScrapper):
                 lectures.append({
                     "title": item.get("title"),
                     "item_type": item.get("item_type"),
-                    "description": item.get("description"),
+                    "description": item.get("description")[:CURRICULUM_ITEM_DESCRIPTION_LEN],
                     "index": item_counter,#item.get("object_index", 0),
                     "section_index": counter,
                     "udemy_lesson_id": item.get("id", 0),

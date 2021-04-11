@@ -4,7 +4,7 @@ from scrappers.base_scrapper import BaseScrapper
 from typing import List
 from json import loads
 
-from constants.constants import SMARTY_BRO_BASE_URL
+from constants.constants import SMARTY_BRO_BASE_URL, COURSE_DESCRIPTION_LEN, COURSE_GOALS_LEN, COURSE_REQUIREMENTS_LEN
 
 
 class SmartyBroScrapper(BaseScrapper):
@@ -22,6 +22,7 @@ class SmartyBroScrapper(BaseScrapper):
             whatyoulllearn = self._find_course_objectives(content)
             requirements = self._find_course_requirements(content)
             description = self._find_course_description(content)
+
             poster = self._find_course_poster(content)
             if udemy_url:
                 results[course_title] = {"smartybro_url": smartybro_url,
@@ -60,7 +61,7 @@ class SmartyBroScrapper(BaseScrapper):
         if 'udemy.com' not in cleaned_url:
             log(f"Non-udemy URL detected = {cleaned_url}", "warn")
             return None
-        return cleaned_url
+        return cleaned_url.strip()
 
     def _find_course_objectives(self, content):
         target_elements = super()._find_content_on_page(content, 'div', 'ud-component--course-landing-page-udlite'
@@ -69,7 +70,8 @@ class SmartyBroScrapper(BaseScrapper):
             objectives = target_elements[0]
             objectives_goals = objectives.attrs['data-component-props']
             objectives_data = loads(objectives_goals)
-            return "".join([f'<li>{objective}</li>' for objective in list(objectives_data.values())[0]])
+            return ''.join([f'<li>{objective}</li>' for objective in
+                            list(objectives_data.values())[0]])[:COURSE_GOALS_LEN]
         return None
 
     def _find_course_requirements(self, content):
@@ -79,7 +81,7 @@ class SmartyBroScrapper(BaseScrapper):
             requirements_element = target_elements[0]
             data = requirements_element.attrs['data-component-props']
             requirements = loads(data)
-            return ''.join([f'<li>{item}</li>' for item in requirements['prerequisites']])
+            return ''.join([f'<li>{item}</li>' for item in requirements['prerequisites']])[:COURSE_REQUIREMENTS_LEN]
         return None
 
     def _find_course_description(self, content):
@@ -88,8 +90,8 @@ class SmartyBroScrapper(BaseScrapper):
         if len(target_elements):
             description_element = target_elements[0]
             data = description_element.attrs['data-component-props']
-            description = loads(data)
-            return description.get('description')
+            description = loads(data).get('description')
+            return description[:COURSE_DESCRIPTION_LEN] if description is not None else description
         return None
 
     def _find_course_poster(self, content):

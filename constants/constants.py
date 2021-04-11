@@ -1,3 +1,5 @@
+from os import getenv
+
 COMMON_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/81.0.4044.138 Safari/537.36',
@@ -176,10 +178,15 @@ LANDING_COMPONENTS = {"prefix": "https://www.udemy.com/api-2.0/course-landing-co
 COURSE_DATA = {"prefix": "https://www.udemy.com/api-2.0/courses/",
                "suffix": "?fields[course]=primary_category,primary_subcategory,context_info,locale"}
 
-
 # elastic search data
-from os import getenv
 
 ES_PORT = getenv('ES_PORT', 9200)
 ES_COURSES_INDEX = getenv('ES_COURSES_INDEX', 'xenecca-course')
 COURSES_ES_ENDPOINT = f'http://localhost:{ES_PORT}/{ES_COURSES_INDEX}/_doc/'
+
+
+# length constants
+CURRICULUM_ITEM_DESCRIPTION_LEN = 500
+COURSE_DESCRIPTION_LEN = 6000
+COURSE_GOALS_LEN = 1000
+COURSE_REQUIREMENTS_LEN=1000

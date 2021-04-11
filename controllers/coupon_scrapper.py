@@ -38,12 +38,14 @@ class ScrapperRunner:
     def scrape_all_on_smartybro_page(self, page_no):
         courses = self.smartybro_scrapper.find_host_and_udemy_urls_for_page(page_no)
         # do not scrape courses that're already scrapped
-        courses_to_scrape = {title: data for title, data in courses.items() if data["udemy_url"] not in self._courses}
+        courses_to_scrape = [(title, data) for title, data in courses.items() if data["udemy_url"]
+                             not in self._courses]
+        courses_to_scrape.sort(reverse=True)
         return self.scrape_courses_on_udemy(courses_to_scrape)
 
     def scrape_courses_on_udemy(self, courses):
         num_of_new_courses = 0
-        for course, data in courses.items():
+        for course, data in courses:
             udemy_url = data["udemy_url"]
             log_with_timestamp(f"<<< Fetching the details about the course with title = {course} >>>")
             page_content = self.udemy_scrapper.get_page_content(udemy_url)
@@ -85,7 +87,6 @@ class ScrapperRunner:
                 if subcategory is None:
                     subcategory = self._try_save_subcategory(subcategory_name, category)
                     put_if_not_null(self._subcategories, subcategory_name, subcategory)
-
                 if topic is None:
                     topic = self._try_save_topic(topic_name, subcategory)
                     put_if_not_null(self._topics, topic_name, topic)
@@ -103,10 +104,12 @@ class ScrapperRunner:
                 price_details = course_details["price_details"]
                 ratings = {f'rating_count_{key}': value for key, value in course_details["ratings"].items()}
                 to_update = course is not None
+
+                # if not (category and subcategory and topic and language):
+                #     continue
                 course = self._try_save_course(course,
                                                **{**incentives, **headline_data, **price_details, **ratings, **data,
                                                   "udemy_id": udemy_id})
-                print(category, subcategory, topic, course.id)
                 if course is not None:
                     course.category = category
                     course.subcategory = subcategory
@@ -117,6 +120,8 @@ class ScrapperRunner:
                         self.course_dao.update()
                         store_course_in_es_index(course)
                     except Exception as e:
+                        raise e
+                        print(course, topic)
                         log_with_timestamp(f"FATAL ERROR: {e}", "error")
                         continue
                     if not to_update:
