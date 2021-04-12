@@ -16,14 +16,12 @@ BASIC_COURSE_DETAILS_URL = {
     "num_subscribers ",
 }
 
-# deal_badge, discount_expiration, gift_this_course, price_text, purchase, redeem_coupon, cacheable_deal_badge,
-# cacheable_discount_expiration, cacheable_price_text, cacheable_buy_button, buy_button, buy_for_team,
-# cacheable_purchase_text, cacheable_add_to_cart, money_back_guarantee, instructor_links,
-# top_companies_notice_context, curated_for_ufb_notice, sidebar_container, purchase_tabs_context,
-# subscribe_team_modal_context
 COURSE_INCENTIVES_AND_PRICE = {
     "prefix": "https://www.udemy.com/api-2.0/course-landing-components/",
-    "suffix": "/me/?components=deal_badge,discount_expiration,gift_this_course,price_text,purchase,redeem_coupon,cacheable_deal_badge,cacheable_discount_expiration,cacheable_price_text,cacheable_buy_button,buy_button,buy_for_team,cacheable_purchase_text,cacheable_add_to_cart,money_back_guarantee,instructor_links,top_companies_notice_context,curated_for_ufb_notice,sidebar_container",
+    "suffix": "/me/?components=deal_badge,discount_expiration,gift_this_course,price_text,purchase,redeem_coupon,"
+              "cacheable_deal_badge,cacheable_discount_expiration,cacheable_price_text,cacheable_buy_button,"
+              "buy_button,buy_for_team,cacheable_purchase_text,cacheable_add_to_cart,money_back_guarantee,"
+              "instructor_links,top_companies_notice_context,curated_for_ufb_notice,sidebar_container",
 }
 
 SMARTY_BRO_BASE_URL = "https://smartybro.com/page/"

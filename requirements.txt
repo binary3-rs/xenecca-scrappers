@@ -1,5 +1,4 @@
 sqlalchemy
-dotenv
 requests
 browser_cookie3
 BeautifulSoup4
