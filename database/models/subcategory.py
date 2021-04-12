@@ -1,6 +1,8 @@
-from database.models.category import Category
-from ..sqlalchemy_extension import *
 from datetime import datetime
+
+from database.models.category import Category
+
+from ..sqlalchemy_extension import *
 
 
 class Subcategory(Base):

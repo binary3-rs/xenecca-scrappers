@@ -1,8 +1,10 @@
 # elastic search methods
+from json import dumps, loads
+
+from requests import put
+
 from constants.constants import COURSES_ES_ENDPOINT
 from utils.utils_functions import log_with_timestamp
-from json import loads, dumps
-from requests import put
 
 
 def store_course_in_es_index(course):
@@ -13,10 +15,14 @@ def store_course_in_es_index(course):
 
 def _store_course_es_record(id, record):
     try:
-        res = put(f'{COURSES_ES_ENDPOINT}{id}', dumps(record), headers={'Content-Type': 'application/json'})
+        res = put(
+            f"{COURSES_ES_ENDPOINT}{id}",
+            dumps(record),
+            headers={"Content-Type": "application/json"},
+        )
         res = loads(res.content)
-        if 'error' in res:
-            raise ValueError(res['error'])
+        if "error" in res:
+            raise ValueError(res["error"])
     except Exception as e:
         log_with_timestamp(f"Creating a record failed. Error message = {e}.")
 
@@ -46,7 +52,9 @@ def _convert_course_object_to_es_record(course):
         "duration_in_hrs": duration,
         "num_of_students": course.num_of_students,
         "num_of_reviews": course.num_of_reviews,
-        "updated_at": course.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
-        "instructors": [{'full_name': instructor.full_name, "image": instructor.image_path} for instructor in
-                        course.instructors]
+        "updated_at": course.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+        "instructors": [
+            {"full_name": instructor.full_name, "image": instructor.image_path}
+            for instructor in course.instructors
+        ],
     }

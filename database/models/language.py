@@ -1,7 +1,8 @@
-from ..sqlalchemy_extension import db
 from datetime import datetime
 from typing import Dict
+
 from ..sqlalchemy_extension import *
+from ..sqlalchemy_extension import db
 
 
 class Language(Base):
@@ -15,4 +16,3 @@ class Language(Base):
 
     def __init__(self, name):
         self.name = name
-

@@ -1,14 +1,21 @@
-from sqlalchemy import CheckConstraint
-from ..sqlalchemy_extension import db, Base
 from datetime import datetime
+
+from sqlalchemy import CheckConstraint
+
+from ..sqlalchemy_extension import Base, db
 
 
 class Instructor(Base):
     __tablename__ = "instructor"
-    __table_args__ = (CheckConstraint('avg_rating >= 0 and avg_rating <= 5'), CheckConstraint('price >= 0'),
-                      CheckConstraint('0 <= discount_percent <= 100'), CheckConstraint('0 <= duration_in_mins'),
-                      CheckConstraint('num_of_articles >= 1'), CheckConstraint('num_of_reviews >= 0'),
-                      CheckConstraint('students_enrolled >= 0'))
+    __table_args__ = (
+        CheckConstraint("avg_rating >= 0 and avg_rating <= 5"),
+        CheckConstraint("price >= 0"),
+        CheckConstraint("0 <= discount_percent <= 100"),
+        CheckConstraint("0 <= duration_in_mins"),
+        CheckConstraint("num_of_articles >= 1"),
+        CheckConstraint("num_of_reviews >= 0"),
+        CheckConstraint("students_enrolled >= 0"),
+    )
 
     id = db.Column(db.BigInteger, primary_key=True)
     avg_rating = db.Column(db.Numeric(precision=6, scale=5))

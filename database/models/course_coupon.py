@@ -1,5 +1,6 @@
-from ..sqlalchemy_extension import *
 from datetime import datetime
+
+from ..sqlalchemy_extension import *
 
 
 class CourseCoupon(Base):
@@ -13,4 +14,3 @@ class CourseCoupon(Base):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     approved = db.Column(db.Boolean, default=False)
     scrapped = db.Column(db.Boolean, default=False)
-

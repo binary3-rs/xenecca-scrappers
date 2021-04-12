@@ -1,6 +1,8 @@
-from controllers.coupon_scrapper import ScrapperRunner
-import urllib3
 from datetime import datetime
+
+import urllib3
+
+from controllers.coupon_scrapper import ScrapperRunner
 from utils.utils_functions import log, log_exception, log_with_timestamp
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

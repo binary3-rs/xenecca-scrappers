@@ -1,14 +1,17 @@
-from os import path
 import logging
-from dotenv import load_dotenv
 from datetime import datetime
+from os import path
 
-LOCAL_FILE_PATH = path.dirname(path.realpath('__file__'))
+from dotenv import load_dotenv
+
+LOCAL_FILE_PATH = path.dirname(path.realpath("__file__"))
 load_dotenv()
 # logger
-logging.basicConfig(filename=f'../xenecca-scrappers/logs/coupon_scrapper_{str(datetime.utcnow().strftime("%Y_%m_%d"))}.log',
-                    level=logging.DEBUG)
+logging.basicConfig(
+    filename=f"../xenecca-scrappers/logs/coupon_scrapper_"
+    f'{str(datetime.utcnow().strftime("%Y_%m_%d"))}.log',
+    level=logging.DEBUG,
+)
 
 # media folder
-COURSES_MEDIA_DIR_PATH = 'images/courses/'
-
+COURSES_MEDIA_DIR_PATH = "images/courses/"

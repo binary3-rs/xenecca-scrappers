@@ -1,24 +1,32 @@
+from datetime import datetime
+
 from sqlalchemy import CheckConstraint
 
 from database.models.category import Category
 from database.models.course_instructor import course_instructor
-from database.models.curriculum_item import CurriculumItem
 from database.models.subcategory import Subcategory
 from database.models.topic import Topic
-from ..sqlalchemy_extension import db, Base, relationship
-from datetime import datetime
 
+from ..sqlalchemy_extension import Base, db, relationship
 from .language import Language
 
 
 class Course(Base):
     __tablename__ = "course"
-    __table_args__ = (CheckConstraint('avg_rating >= 0 and avg_rating <= 5'), CheckConstraint('price >= 0'),
-                      CheckConstraint('0 <= discount_percent <= 100'), CheckConstraint('0 <= duration_in_mins'),
-                      CheckConstraint('num_of_articles >= 0'), CheckConstraint('num_of_reviews >= 0'),
-                      CheckConstraint('students_enrolled >= 0'), CheckConstraint('rating_1 >= 0'),
-                      CheckConstraint('rating_2 >= 0'), CheckConstraint('rating_3 >= 0'),
-                      CheckConstraint('rating_4 >= 0'), CheckConstraint('rating_5 >= 0'))
+    __table_args__ = (
+        CheckConstraint("avg_rating >= 0 and avg_rating <= 5"),
+        CheckConstraint("price >= 0"),
+        CheckConstraint("0 <= discount_percent <= 100"),
+        CheckConstraint("0 <= duration_in_mins"),
+        CheckConstraint("num_of_articles >= 0"),
+        CheckConstraint("num_of_reviews >= 0"),
+        CheckConstraint("students_enrolled >= 0"),
+        CheckConstraint("rating_1 >= 0"),
+        CheckConstraint("rating_2 >= 0"),
+        CheckConstraint("rating_3 >= 0"),
+        CheckConstraint("rating_4 >= 0"),
+        CheckConstraint("rating_5 >= 0"),
+    )
 
     id = db.Column(db.BigInteger, primary_key=True)
     avg_rating = db.Column(db.Numeric(precision=6, scale=5))
@@ -57,7 +65,7 @@ class Course(Base):
     # created_at = db.Column(db.DateTime(timezone=True), server_default=db.sql.func.now())
     created_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     updated_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
-    #updated_at = db.Column(db.DateTime(timezone=True), server_default=db.sql.func.now())
+    # updated_at = db.Column(db.DateTime(timezone=True), server_default=db.sql.func.now())
 
     # associated entities
     language_id = db.Column(db.Integer, db.ForeignKey("language.id"), nullable=False)
@@ -74,7 +82,9 @@ class Course(Base):
         primaryjoin="Course.category_id == Category.id",
     )
 
-    subcategory_id = db.Column(db.Integer, db.ForeignKey("subcategory.id"), nullable=False)
+    subcategory_id = db.Column(
+        db.Integer, db.ForeignKey("subcategory.id"), nullable=False
+    )
     subcategory = relationship(
         Subcategory,
         backref="courses",
@@ -89,9 +99,8 @@ class Course(Base):
     )
 
     instructors = relationship(
-        "Instructor",
-        secondary=course_instructor,
-        backref="courses")
+        "Instructor", secondary=course_instructor, backref="courses"
+    )
 
     def __init__(self, **kwargs):
         self.update(**kwargs)
@@ -103,5 +112,7 @@ class Course(Base):
         return self
 
     def __str__(self):
-        return f'Course: id = [{self.id}], title = [{self.title}], udemy_id = [{self.udemy_id}],' \
-               f' udemy_url = [{self.udemy_url}], smartybro_url = [{self.smartybro_url}]'
+        return (
+            f"Course: id = [{self.id}], title = [{self.title}], udemy_id = [{self.udemy_id}],"
+            f" udemy_url = [{self.udemy_url}], smartybro_url = [{self.smartybro_url}]"
+        )

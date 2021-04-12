@@ -1,14 +1,14 @@
-from requests import get
+from datetime import datetime, timezone
+from logging import debug, error, info, warning
 from os import path, sep
 
-from logging import debug, info, warning, error
-from datetime import datetime, timezone
+from requests import get
 
-from constants.constants import LANDING_COMPONENTS, COURSE_DATA
 from constants.config import COURSES_MEDIA_DIR_PATH
+from constants.constants import COURSE_DATA, LANDING_COMPONENTS
 from database.sqlalchemy_extension import db
 
-LOCAL_FILE_PATH = path.dirname(path.realpath('__file__'))
+LOCAL_FILE_PATH = path.dirname(path.realpath("__file__"))
 
 
 def download_image(url, type="poster"):
@@ -16,15 +16,17 @@ def download_image(url, type="poster"):
         raise ValueError("The url is not valid.")
     if type not in ("poster", "instructor"):
         raise ValueError("The image target type is not valid.")
-    filename = url.split('/')[-1].split('?')[0]
-    filepath = path.join(LOCAL_FILE_PATH, COURSES_MEDIA_DIR_PATH + type + "s" + sep + filename)
+    filename = url.split("/")[-1].split("?")[0]
+    filepath = path.join(
+        LOCAL_FILE_PATH, COURSES_MEDIA_DIR_PATH + type + "s" + sep + filename
+    )
     return _download_image(url, filepath)
 
 
 def _download_image(url, destination):
     log(f"Downloading image from the url = {url}...")
     data = get(url, allow_redirects=True)
-    with open(destination, 'wb') as image_handler:
+    with open(destination, "wb") as image_handler:
         image_handler.write(data.content)
     return destination
 
@@ -63,13 +65,13 @@ def load_data_as_map(data, key):
 def convert_duration_from_str_to_int(duration):
     if duration is None or len(duration) == 0:
         return 0
-    if ':' not in duration:
+    if ":" not in duration:
         try:
             return int(duration)
         except ValueError:
             return 0
     hours, mins, seconds = 0, 0, 0
-    duration_components = duration.split(':')
+    duration_components = duration.split(":")
     seconds = int(duration_components[-1])
     if len(duration_components) == 2:
         mins = int(duration_components[0])
@@ -90,10 +92,17 @@ def try_save(fn, data, default_value=None, message_subject=""):
 
 
 def log_exception(e, message_subject=None):
-    if isinstance(e, db.exc.InvalidRequestError) or isinstance(e, db.exc.IntegrityError):
-        log_with_timestamp(f"ERROR: {message_subject} cannot be saved. Data integrity error: {e}.", "error")
+    if isinstance(e, db.exc.InvalidRequestError) or isinstance(
+        e, db.exc.IntegrityError
+    ):
+        log_with_timestamp(
+            f"ERROR: {message_subject} cannot be saved. Data integrity error: {e}.",
+            "error",
+        )
     elif isinstance(e, db.exc.ProgrammingError):
-        log_with_timestamp(f"ERROR: {message_subject} cannot be created/updated. Reason: {e}!", "error")
+        log_with_timestamp(
+            f"ERROR: {message_subject} cannot be created/updated. Reason: {e}!", "error"
+        )
     elif isinstance(e, db.exc.DataError):
         log_with_timestamp(f"ERROR: Invalid data parameters: {e}", "error")
     else:
@@ -108,5 +117,3 @@ def load_data_into_dict(dao, key="name"):
 def put_if_not_null(collection, key, value):
     if key is not None:
         collection[key] = value
-
-

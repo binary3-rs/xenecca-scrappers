@@ -2,13 +2,9 @@ from database.models.course import Course
 from database.sqlalchemy_extension import db, session
 
 
-# finish
 class CourseDAO:
     def __init__(self):
         self._session = session
-
-    def find(self, id):
-        return
 
     def create(self, **kwargs):
         course = Course(**kwargs)

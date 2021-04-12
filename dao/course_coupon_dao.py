@@ -7,7 +7,9 @@ class CourseCouponDAO:
         self._session = session
 
     def find_by_state(self, approved=True, scrapped=False):
-        return self._session.query(CourseCoupon).filter_by(approved=approved, scrapped=scrapped)
+        return self._session.query(CourseCoupon).filter_by(
+            approved=approved, scrapped=scrapped
+        )
 
     def update(self, coupon=None, **kwargs):
         try:

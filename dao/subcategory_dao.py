@@ -1,4 +1,3 @@
-from database.models.category import Category
 from database.models.subcategory import Subcategory
 from database.sqlalchemy_extension import session
 

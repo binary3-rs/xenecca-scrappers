@@ -1,6 +1,8 @@
-from database.models.subcategory import Subcategory
-from ..sqlalchemy_extension import *
 from datetime import datetime
+
+from database.models.subcategory import Subcategory
+
+from ..sqlalchemy_extension import *
 
 
 class Topic(Base):
@@ -13,7 +15,9 @@ class Topic(Base):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # associated entities
-    subcategory_id = db.Column(db.Integer, db.ForeignKey("subcategory.id"), nullable=False)
+    subcategory_id = db.Column(
+        db.Integer, db.ForeignKey("subcategory.id"), nullable=False
+    )
     subcategory = relationship(
         Subcategory,
         backref="topics",

@@ -1,5 +1,6 @@
-from ..sqlalchemy_extension import db, Base, relationship
 from datetime import datetime
+
+from ..sqlalchemy_extension import Base, db, relationship
 
 
 class CurriculumItem(Base):

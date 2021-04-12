@@ -1,5 +1,6 @@
-from ..sqlalchemy_extension import *
 from datetime import datetime
+
+from ..sqlalchemy_extension import *
 
 
 class Category(Base):

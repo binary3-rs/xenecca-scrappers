@@ -12,19 +12,6 @@ class CurriculumItemDAO:
     def find_by_course_id(self, course_id):
         return self._session.query(CurriculumItem).find_by(course_id=course_id)
 
-    # def find_language_names(self):
-    #     return self._session.query(Language.name).all()
-
-    # def find_by_title(self, name):
-    #     return self._session.query(Category).filter_by(name=name)
-    #
-    # def find_or_create(self, name):
-    #     result = self._session.query(Category).filter_by(name=name).first()
-    #     if result is None:
-    #         category = Category(name)
-    #         result = self.save(category)
-    #     return result
-
     def create_without_save(self, **kwargs):
         curriculum_item = CurriculumItem(**kwargs)
         return curriculum_item

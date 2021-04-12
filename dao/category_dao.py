@@ -8,9 +8,6 @@ class CategoryDAO:
 
     def find_all(self):
         return self._session.query(Category).all()
-    #
-    # def find_language_names(self):
-    #     return self._session.query(Language.name).all()
 
     def find_by_name(self, name):
         return self._session.query(Category).filter_by(name=name)
