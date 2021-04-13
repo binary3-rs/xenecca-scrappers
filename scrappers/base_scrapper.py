@@ -1,8 +1,9 @@
 from typing import List
-
+from selenium import webdriver
 from bs4 import BeautifulSoup
 from requests import get
 from requests.exceptions import ConnectionError
+from selenium.webdriver.chrome.options import Options
 
 from constants.constants import COMMON_HEADERS
 from utils.utils_functions import log_with_timestamp
@@ -13,8 +14,13 @@ class BaseScrapper:
         super().__init__()
         self.courses = {}
 
+        options = Options()
+        options.add_argument("--headless")
+        self.browser = webdriver.Chrome(options=options, executable_path='/home/nenad/Documents/binary3/xenecca'
+                                                                         '/xenecca-scrappers/chromedriver')
+
     def get_page_content(
-        self, url, headers=COMMON_HEADERS, verify=False
+            self, url, headers=COMMON_HEADERS, verify=False
     ) -> "BeautifulSoup":
         """
         Fetchs data content and returns content of the page as HTML payload
@@ -27,6 +33,28 @@ class BaseScrapper:
             req = get(url, headers=headers, verify=verify)
             log_with_timestamp(f"URL = {url}, data fetched successfully.", type="info")
             return BeautifulSoup(req.content, "html.parser")
+        except ConnectionError:
+            log_with_timestamp(
+                f"The URL = {url} is not valid and the data cannot be fetched.",
+                type="error",
+            )
+            return None
+
+    def get_page_content(
+            self, url, headers=COMMON_HEADERS, verify=False
+    ) -> "BeautifulSoup":
+        """
+        Fetchs data content and returns content of the page as HTML payload
+        :param url: target URL where to send request
+        :param headers: HTTP headers
+        :param verify: verification flag
+        :return: BeautifulSoup object with the content of the page or None
+        """
+
+        try:
+            self.browser.get(url)
+            log_with_timestamp(f"URL = {url}, data fetched successfully.", type="info")
+            return BeautifulSoup(self.browser.page_source, "html.parser")
         except ConnectionError:
             log_with_timestamp(
                 f"The URL = {url} is not valid and the data cannot be fetched.",

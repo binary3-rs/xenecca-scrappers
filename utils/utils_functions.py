@@ -106,6 +106,7 @@ def log_exception(e, message_subject=None):
     elif isinstance(e, db.exc.DataError):
         log_with_timestamp(f"ERROR: Invalid data parameters: {e}", "error")
     else:
+        raise e
         log_with_timestamp(f"ERROR: An unpredicted error occurred: {e}!", "error")
 
 

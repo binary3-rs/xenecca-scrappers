@@ -1,16 +1,15 @@
 from json import loads
 from typing import List
 
-from constants.config import COURSES_MEDIA_DIR_PATH
 from constants.constants import (COURSE_DESCRIPTION_LEN, COURSE_GOALS_LEN,
                                  COURSE_REQUIREMENTS_LEN, SMARTY_BRO_BASE_URL)
 from scrappers.base_scrapper import BaseScrapper
-from utils.utils_functions import download_image, log
+from utils.utils_functions import log
 
 
 class SmartyBroScrapper(BaseScrapper):
     def __init__(self):
-        pass
+        super().__init__()
 
     def find_host_and_udemy_urls_for_page(self, page):
         url = f"{SMARTY_BRO_BASE_URL}{page}"
