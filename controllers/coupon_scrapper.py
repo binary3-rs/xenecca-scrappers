@@ -9,12 +9,19 @@ from dao.instructor_dao import InstructorDAO
 from dao.language_dao import LanguageDAO
 from dao.subcategory_dao import SubcategoryDAO
 from dao.topic_dao import TopicDAO
-from scrappers.smartybro_scrapper import SmartyBroScrapper
+from scrappers.courses.smartybro_scrapper import find_host_and_udemy_urls_for_page
+from scrappers.scrapper import get_page_content
 from scrappers.udemy_scrapper import UdemyScrapper
 from utils.search import store_course_in_es_index
-from utils.utils_functions import (download_image, load_data_into_dict, log,
-                                   log_exception, log_with_timestamp,
-                                   put_if_not_null, try_save)
+from utils.utils_functions import (
+    download_image,
+    load_data_into_dict,
+    log,
+    log_exception,
+    log_with_timestamp,
+    put_if_not_null,
+    try_save,
+)
 
 
 class ScrapperRunner:
@@ -35,11 +42,10 @@ class ScrapperRunner:
         self._topics = load_data_into_dict(self.topic_dao, "name")
         self._instructors = load_data_into_dict(self.instructor_dao, "udemy_id")
         self._curriculum = _load_curriculum(self.curriculum_item_dao)
-        self.smartybro_scrapper = SmartyBroScrapper()
         self.udemy_scrapper = UdemyScrapper()
 
     def scrape_all_on_smartybro_page(self, page_no):
-        courses = self.smartybro_scrapper.find_host_and_udemy_urls_for_page(page_no)
+        courses = find_host_and_udemy_urls_for_page(page_no)
         # do not scrape courses that're already scrapped
         courses_to_scrape = [
             (title, data)
@@ -56,7 +62,7 @@ class ScrapperRunner:
             log_with_timestamp(
                 f"<<< Fetching the details about the course with title = {course} >>>"
             )
-            page_content = self.udemy_scrapper.get_page_content(udemy_url)
+            page_content = get_page_content(udemy_url)
             if page_content is None:
                 log_with_timestamp(
                     f"WARNING: Cannot fetch the data from the Udemy for the course with native"
@@ -65,7 +71,8 @@ class ScrapperRunner:
                 )
                 continue
             udemy_id = self.udemy_scrapper.find_udemy_course_id(page_content)
-            headline = self.udemy_scrapper.find_udemy_course_headline(page_content)
+            # headline = self.udemy_scrapper.find_udemy_course_headline(page_content)
+            headlone = None
             if headline:
                 headline = headline.strip()
             course = self._courses.get(udemy_url)

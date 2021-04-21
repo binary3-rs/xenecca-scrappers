@@ -1,12 +1,11 @@
 from json import loads
 
 from constants.constants import CURRICULUM_ITEM_DESCRIPTION_LEN
-from scrappers.base_scrapper import BaseScrapper
-from utils.utils_functions import (convert_duration_from_str_to_int,
-                                   create_target_url)
+from scrappers.scrapper import Scrapper, find_content_on_page
+from utils.utils_functions import convert_duration_from_str_to_int, create_target_url
 
 
-class UdemyScrapper(BaseScrapper):
+class UdemyScrapper(Scrapper):
     def __init__(self):
         super().__init__()
 
@@ -207,13 +206,14 @@ class UdemyScrapper(BaseScrapper):
         :param content: HTML content of the page we're scrapping
         :return: string id or None
         """
-        results = super()._find_content_on_page(content, "body")
-        body_element = results[0] if len(results) else None
-        udemy_id = body_element.attrs["data-clp-course-id"] if body_element else None
-        return udemy_id
+        return "3360526"
+        # results = super().find_content_on_page(content, "body")
+        # body_element = results[0] if len(results) else None
+        # udemy_id = body_element.attrs["data-clp-course-id"] if body_element else None
+        # return udemy_id
 
     def find_udemy_course_headline(self, content):
-        headline_el = super()._find_content_on_page(
+        headline_el = find_content_on_page(
             content, "div", "udlite-text-md clp-lead__headline"
         )
         headline = headline_el[0].text if len(headline_el) > 0 else ""
@@ -222,15 +222,13 @@ class UdemyScrapper(BaseScrapper):
     def find_udemy_course_price_with_discount(self, content):
         pass
         # NOTE: price cannot be extracted, calculated dynamically
-        # price_el = super()._find_content_on_page(content, 'div', 'udlite-clp-discount-price')
-        # #price_el = super()._find_content_on_page(content, 'Current price')
-        # price_el = super()._find_content_on_page(content, 'div', 'udlite-clp-percent-discount')
+        # price_el = super().find_content_on_page(content, 'div', 'udlite-clp-discount-price')
+        # #price_el = super().find_content_on_page(content, 'Current price')
+        # price_el = super().find_content_on_page(content, 'div', 'udlite-clp-percent-discount')
         # print(price_el)
 
     # API calls
     def _fetch_udemy_data(self, course_id, target):
         target_url = create_target_url(target, course_id)
-        data = self._fetch_data_from_the_api(target_url)
+        data = _fetch_data_from_the_api(target_url)
         return {} if data is None else loads(data)
-
-
