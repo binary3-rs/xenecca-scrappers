@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from logging import debug, error, info, warning
 from os import path, sep
-
+from json import load
 from requests import get
 
 from constants.config import COURSES_MEDIA_DIR_PATH
@@ -118,3 +118,9 @@ def load_data_into_dict(dao, key="name"):
 def put_if_not_null(collection, key, value):
     if key is not None:
         collection[key] = value
+
+
+def load_from_json(json_path):
+    with open(json_path) as json_file:
+        return load(json_file)
+

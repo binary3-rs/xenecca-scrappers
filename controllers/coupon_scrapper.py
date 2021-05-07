@@ -13,7 +13,7 @@ from scrappers.courses.smartybro_scrapper import find_host_and_udemy_urls_for_pa
 from scrappers.scrapper import get_page_content
 from scrappers.udemy_scrapper import UdemyScrapper
 from utils.search import store_course_in_es_index
-from utils.utils_functions import (
+from utils.common import (
     download_image,
     load_data_into_dict,
     log,

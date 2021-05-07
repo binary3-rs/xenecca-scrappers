@@ -1,0 +1,11 @@
+{
+  "Design": ["Web design", "Graphic Design & Illustration", "Design tools", "User Experience Design", "Game Design",
+    "3D & Animation", "Other"],
+  "Development":  ["Web Development", "Data Science", "Mobile Development", "Programming Languages", "Game Development",
+    "Database Design & Development", "Software Testing", "Software Engineering", "Development Tools",
+    "No-Code Development", "Other"],
+  "IT & Software": ["IT Certification", "Network & Security", "Hardware", "Operating Systems", "Other IT & Software",
+    "Other"],
+  "Marketing": ["Digital Marketing", "Search Engine Optimization", "Social Media Marketing", "Branding", "Advertising",
+    "Video & Mobile Marketing", "Growth Hacking", "Affiliate Marketing", "Product Marketing", "Other"]
+}

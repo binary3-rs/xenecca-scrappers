@@ -1,10 +1,12 @@
+from json import loads
 from typing import List
+
 from bs4 import BeautifulSoup
 from requests import get
 from requests.exceptions import ConnectionError
 
 from constants.constants import COMMON_HEADERS
-from utils.utils_functions import log_with_timestamp
+from utils.common import log_with_timestamp
 
 
 def get_page_content(url, headers=COMMON_HEADERS, verify=False) -> "BeautifulSoup":
@@ -53,13 +55,13 @@ def get_elements_on_page(**kwargs):
     return _get_page_elements(content, kwargs["index"])
 
 
-def _fetch_data_from_the_api(url):
+def fetch_data_from_the_api(url):
     if url is None:
         return None
     response = get(url, headers=COMMON_HEADERS, verify=False)
     # TODO: if 404, log that
     if response.status_code == 200:
-        return response.content
+        return loads(response.content)
     log_with_timestamp(
         f"An error occurred while fetching the data from the URL = {url}", "error"
     )

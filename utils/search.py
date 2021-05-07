@@ -4,7 +4,7 @@ from json import dumps, loads
 from requests import put
 
 from constants.constants import COURSES_ES_ENDPOINT
-from utils.utils_functions import log_with_timestamp
+from utils.common import log_with_timestamp
 
 
 def store_course_in_es_index(course):

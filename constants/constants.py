@@ -2,18 +2,18 @@ from os import getenv
 
 COMMON_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/81.0.4044.138 Safari/537.36",
+                  "Chrome/81.0.4044.138 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/png,*/*;q=0.8,"
-    "application/signed-exchange;v=b3;q=0.9 ",
+              "application/signed-exchange;v=b3;q=0.9 ",
 }
 
 # URLs
 BASIC_COURSE_DETAILS_URL = {
     "prefix": "https://www.udemy.com/api-2.0/courses/",
     "suffix": "/?fields[course]=primary_category,"
-    "primary_subcategory,avg_rating_recent,visible_instructors, locale,"
-    "estimated_content_length,"
-    "num_subscribers ",
+              "primary_subcategory,avg_rating_recent,visible_instructors, locale,"
+              "estimated_content_length,"
+              "num_subscribers ",
 }
 
 COURSE_INCENTIVES_AND_PRICE = {
@@ -25,11 +25,18 @@ COURSE_INCENTIVES_AND_PRICE = {
 }
 
 SMARTY_BRO_BASE_URL = "https://smartybro.com/page/"
+FREEWEB_CART_BASE_URL = {
+    "prefix": "https://www.freewebcart.com/wp-admin/admin-ajax.php?offset=",
+    "suffix": r"&template=courses%2Fgrid&args=%7B%22image_d%22%3A%22img-480-380%22%2C%22per_row%22%3A%226%22%2C%22"
+              r"posts_per_page%22%3A%2212%22%2C%22class%22%3A%22archive_grid%22%7D&action=stm_lms_load_content&"
+              r"nonce=bbc95e8985&sort=date_high"
+}
+
 
 LANDING_COMPONENTS = {
     "prefix": "https://www.udemy.com/api-2.0/course-landing-components/",
     "suffix": "/me/?components=curriculum,price_text,reviews,incentives,instructor_bio,"
-    "discount_expiration,slider_menu",
+              "discount_expiration,slider_menu",
 }
 
 COURSE_DATA = {
@@ -48,7 +55,13 @@ CURRICULUM_ITEM_DESCRIPTION_LEN = 500
 COURSE_DESCRIPTION_LEN = 6000
 COURSE_GOALS_LEN = 1000
 COURSE_REQUIREMENTS_LEN = 1000
+HEADLINE_LEN = 252
 
 # misc
 NUM_OF_CONSEC_DAYS = 2
 NUM_OF_CONSEC_EMPTY_PAGES_THRESHOLD = 3
+
+#
+CATEGORIES_JSON_PATH = "resources/categories.json"
+
+
