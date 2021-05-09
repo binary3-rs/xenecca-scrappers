@@ -2,13 +2,10 @@ from datetime import datetime
 
 from constants.constants import NUM_OF_CONSEC_DAYS
 from dao.category_dao import CategoryDAO
-from dao.course_coupon_dao import CourseCouponDAO
 from dao.course_dao import CourseDAO
-from dao.curriculum_item_dao import CurriculumItemDAO
-from dao.instructor_dao import InstructorDAO
+
 from dao.language_dao import LanguageDAO
 from dao.subcategory_dao import SubcategoryDAO
-from dao.topic_dao import TopicDAO
 
 from utils.file import delete_file
 from utils.search import store_course_in_es_index
@@ -28,19 +25,12 @@ class ScrapperRunner:
         self.language_dao = LanguageDAO()
         self.category_dao = CategoryDAO()
         self.subcategory_dao = SubcategoryDAO()
-        self.topic_dao = TopicDAO()
-        self.instructor_dao = InstructorDAO()
-        self.curriculum_item_dao = CurriculumItemDAO()
         self.course_dao = CourseDAO()
-        self.coupon_dao = CourseCouponDAO()
         # cache
         self._courses = load_data_into_dict(self.course_dao, "title")
         self._languages = load_data_into_dict(self.language_dao, "name")
         self._categories = load_data_into_dict(self.category_dao, "name")
         self._subcategories = load_data_into_dict(self.subcategory_dao, "name")
-        self._topics = load_data_into_dict(self.topic_dao, "name")
-        self._instructors = load_data_into_dict(self.instructor_dao, "udemy_id")
-        self._curriculum = _load_curriculum(self.curriculum_item_dao)
 
     def scrape(self, scrapper, *arg):
         courses = scrapper.find_basic_courses_details(*arg)

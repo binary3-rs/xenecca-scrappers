@@ -1,5 +1,5 @@
 from database.models.course import Course
-from database.sqlalchemy_extension import db, session
+from database.sqlalchemy_extension import session
 
 
 class CourseDAO:

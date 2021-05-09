@@ -1,5 +1,5 @@
 from database.models.category import Category
-from database.sqlalchemy_extension import db, session
+from database.sqlalchemy_extension import session
 
 
 class CategoryDAO:

@@ -1,5 +1,5 @@
 from database.models.language import Language
-from database.sqlalchemy_extension import db, session
+from database.sqlalchemy_extension import session
 
 
 class LanguageDAO:
