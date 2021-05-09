@@ -8,9 +8,8 @@ from utils.common import log_with_timestamp
 
 
 def store_course_in_es_index(course):
-    id = course.id
     record = _convert_course_object_to_es_record(course)
-    _store_course_es_record(id, record)
+    _store_course_es_record(course.id, record)
 
 
 def _store_course_es_record(id, record):

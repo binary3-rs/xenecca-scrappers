@@ -13,8 +13,7 @@ class SubcategoryDAO:
         return self._session.query(Subcategory).filter_by(name=name).first()
 
     def create(self, name, category):
-        subcategory = Subcategory(name, category)
-        return self.save(subcategory)
+        return self.save(Subcategory(name, category))
 
     def save(self, subcategory) -> "Subcategory":
         """Add subcategory to database"""

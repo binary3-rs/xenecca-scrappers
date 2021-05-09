@@ -49,10 +49,10 @@ class Course(Base):
     price = db.Column(db.Numeric(precision=6, scale=2), default=0)
     old_price = db.Column(db.Numeric(precision=6, scale=2), default=0)
     requirements = db.Column(db.Text(1000))
-    smartybro_url = db.Column(db.String(300), unique=True, nullable=False)
+    host_url = db.Column(db.String(300), unique=True, nullable=False)
     num_of_students = db.Column(db.Integer, default=0)
     title = db.Column(db.String(255), unique=True, nullable=False)
-    udemy_id = db.Column(db.BigInteger, unique=True, nullable=False)
+    udemy_id = db.Column(db.BigInteger, unique=True, nullable=True)
     udemy_url = db.Column(db.String(300), unique=True, nullable=False)
 
     # ratings

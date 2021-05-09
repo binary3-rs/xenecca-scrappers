@@ -71,6 +71,7 @@ def _find_course_details(url):
         "requirements": requirements,
         "description": description,
         "original_poster_url": poster,
+        "language": "English"
     }
 
 
@@ -159,3 +160,20 @@ def _find_course_poster(content):
     )
     poster = poster_elements[0].attrs["data-src"] if len(poster_elements) > 0 else None
     return poster
+
+
+class SmartyBroScrapper:
+    def find_basic_courses_details(self, page_no=1):
+        url = f"{SMARTY_BRO_BASE_URL}{page_no}"
+        page_content = get_page_content(url)
+        return find_host_urls_and_categories_in_page_content(page_content)
+
+    def find_all_course_details(self, url):
+        return _find_course_details(url)
+
+    def find_all_courses_details_on_page(self, courses):
+        results = {}
+        for course_title, data in courses.items():
+            host_url = data["host_url"]
+            results[course_title] = {**data, **_find_course_details(host_url)}
+        return results

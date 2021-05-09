@@ -56,12 +56,14 @@ def get_elements_on_page(**kwargs):
 
 
 def fetch_data_from_the_api(url):
+    print("TEST", url)
     if url is None:
         return None
     response = get(url, headers=COMMON_HEADERS, verify=False)
     # TODO: if 404, log that
     if response.status_code == 200:
         return loads(response.content)
+    print(response)
     log_with_timestamp(
         f"An error occurred while fetching the data from the URL = {url}", "error"
     )

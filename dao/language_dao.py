@@ -16,8 +16,7 @@ class LanguageDAO:
         return self._session.query(Language).filter_by(name=name)
 
     def create(self, name):
-        language = Language(name)
-        return self.save(language)
+        return self.save(Language(name))
 
     def find_or_create(self, name):
         result = self._session.query(Language).filter_by(name=name).first()

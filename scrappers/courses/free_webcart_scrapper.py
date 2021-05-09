@@ -19,7 +19,6 @@ def find_course_details_on_page(page_no=1):
     results = {}
     for course_title, host_url in courses.items():
         results[course_title] = {"host_url": host_url, **_find_course_details(host_url)}
-        break
     return results
 
 
@@ -36,7 +35,7 @@ def find_host_urls_in_page_content(content) -> List:
     for item in course_item_cards:
         title = item.h5.text
         url = item.a["href"]
-        urls[title] = url
+        urls[title] = {"host_url" :url}
     return urls
 
 
@@ -110,9 +109,9 @@ def _find_course_description(content):
         raw_content = "".join([str(subblock) for subblock in block])
         clean_text = sub(clean_pattern, "", raw_content)
         if (
-            len(clean_text) == 0
-            or "adsbygoogle" in clean_text
-            or "function(v,d,o,ai)" in clean_text
+                len(clean_text) == 0
+                or "adsbygoogle" in clean_text
+                or "function(v,d,o,ai)" in clean_text
         ):
             continue
         data.append(clean_text.strip())
@@ -156,3 +155,25 @@ def _fetch_data_from_the_api(url):
     if response is None:
         return response
     return BeautifulSoup(response, features="html.parser")
+
+
+class FreeWebCartScrapper:
+    def find_basic_courses_details(self, categories=("development", "it-software")):
+        courses = {}
+        for category in categories:
+            print(categories)
+            url = f'{FREEWEB_CART_BASE_URL}{category}/'
+            print(url)
+            page_content = get_page_content(url)
+            courses.update(find_host_urls_in_page_content(page_content))
+        print(courses)
+        return courses
+
+    def find_all_course_details(self, url):
+        return _find_course_details(url)
+
+    def find_all_courses_details_on_page(self, courses):
+        results = {}
+        for course_title, host_url in courses.items():
+            results[course_title] = {"host_url": host_url, **_find_course_details(host_url)}
+        return results

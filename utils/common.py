@@ -116,7 +116,7 @@ def load_data_into_dict(dao, key="name"):
 
 
 def put_if_not_null(collection, key, value):
-    if key is not None:
+    if key is not None and value is not None:
         collection[key] = value
 
 

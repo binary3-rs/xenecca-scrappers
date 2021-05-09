@@ -25,13 +25,7 @@ COURSE_INCENTIVES_AND_PRICE = {
 }
 
 SMARTY_BRO_BASE_URL = "https://smartybro.com/page/"
-FREEWEB_CART_BASE_URL = {
-    "prefix": "https://www.freewebcart.com/wp-admin/admin-ajax.php?offset=",
-    "suffix": r"&template=courses%2Fgrid&args=%7B%22image_d%22%3A%22img-480-380%22%2C%22per_row%22%3A%226%22%2C%22"
-              r"posts_per_page%22%3A%2212%22%2C%22class%22%3A%22archive_grid%22%7D&action=stm_lms_load_content&"
-              r"nonce=bbc95e8985&sort=date_high"
-}
-
+FREEWEB_CART_BASE_URL = "https://www.freewebcart.com/course/"
 
 LANDING_COMPONENTS = {
     "prefix": "https://www.udemy.com/api-2.0/course-landing-components/",
