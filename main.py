@@ -10,12 +10,12 @@ from utils.common import log, log_exception, log_with_timestamp
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 if __name__ == "__main__":
     runner = ScrapperRunner()
-    scrapper = FreeWebCartScrapper()
+    scrappers = [(SmartyBroScrapper(), (1,2)), (FreeWebCartScrapper(), ("development", "it-software"))]
     log(f"-----------Scrape results for the date: {datetime.utcnow()})-----------")
-    #page_no = 1  # NOTE: for possible page-wise scrape
-    try:
-        num_of_scrapped_courses, num_of_saved_courses = runner.scrape(scrapper)
-        log_with_timestamp(f"{num_of_saved_courses} new courses added.")
-    except Exception as e:
-        log_exception(e)
+    for scrapper, args in scrappers:
+        try:
+            num_of_scrapped_courses, num_of_saved_courses = runner.scrape(scrapper, args)
+            log_with_timestamp(f"{num_of_saved_courses} new courses added.")
+        except Exception as e:
+            log_exception(e)
     log(f"-----------END-----------")
