@@ -15,7 +15,7 @@ class Course(Base):
 
     id = db.Column(db.BigInteger, primary_key=True)
     description = db.Column(db.Text(6000))
-    goals = db.Column(db.Text(1000))
+    objectives = db.Column(db.Text(1000))
     headline = db.Column(db.String(255))
     poster_path = db.Column(db.String)
     original_poster_url = db.Column(db.String)

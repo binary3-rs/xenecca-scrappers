@@ -1,0 +1,3 @@
+0 */12 * * * ./~/xenecca/scrape.sh >/dev/null 2>&1
+
+
