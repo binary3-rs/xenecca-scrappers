@@ -10,7 +10,7 @@ from utils.common import log, log_exception, log_with_timestamp
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 if __name__ == "__main__":
     runner = ScrapperRunner()
-    scrappers = [(SmartyBroScrapper(), (1,2)), (FreeWebCartScrapper(), ("development", "it-software"))]
+    scrappers = [(SmartyBroScrapper(), (1,)), (FreeWebCartScrapper(), ("development", "it-software", "design"))]
     log(f"-----------Scrape results for the date: {datetime.utcnow()})-----------")
     for scrapper, args in scrappers:
         try:

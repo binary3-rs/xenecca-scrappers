@@ -36,7 +36,7 @@ class FreeWebCartScrapper(BaseCourseScrapper):
         )
         language = cls._find_course_language(course_details_content)
         poster_path = cls._find_course_poster(course_details_content)
-        goals = cls._find_course_objectives(course_details_content)
+        objectives = cls._find_course_objectives(course_details_content)
         description = cls._find_course_description(course_details_content)
         udemy_url = cls._find_course_udemy_url(course_details_content)
         return {
@@ -45,7 +45,7 @@ class FreeWebCartScrapper(BaseCourseScrapper):
             "subcategory": subcategory,
             "language": language,
             "original_poster_url": poster_path,
-            "goals": goals,
+            "objectives": objectives,
             "description": description,
             "udemy_url": udemy_url,
             "host_url": url,

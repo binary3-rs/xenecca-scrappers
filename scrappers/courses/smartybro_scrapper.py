@@ -64,7 +64,7 @@ class SmartyBroScrapper(BaseCourseScrapper):
     def _find_course_details(cls, url):
         content = get_page_content(url)
         udemy_url = cls._find_course_udemy_url(content)
-        whatyoulllearn = cls._find_course_objectives(content)
+        objectives = cls._find_course_objectives(content)
         requirements = cls._find_course_requirements(content)
         description = cls._find_course_description(content)
         poster = cls._find_course_poster(content)
@@ -74,7 +74,7 @@ class SmartyBroScrapper(BaseCourseScrapper):
             "host_url": url,
             "udemy_url": udemy_url,
             "headline": cls._find_course_headline(description),
-            "goals": whatyoulllearn,
+            "objectives": objectives,
             "requirements": requirements,
             "description": description,
             "original_poster_url": poster,
