@@ -3,15 +3,15 @@ from typing import Dict
 
 from constants.constants import (
     COURSE_DESCRIPTION_LEN,
-    COURSE_GOALS_LEN,
+    COURSE_OBJECTIVES_LEN,
     COURSE_REQUIREMENTS_LEN,
-    HEADLINE_LEN,
     SMARTY_BRO_BASE_URL,
+    COURSE_HEADLINE_LEN,
 )
 from scrappers.courses.base_course_scrapper import BaseCourseScrapper
 from scrappers.scrapper import find_content_on_page, get_page_content
 from utils.category_and_topic_mapping import find_category_data
-from utils.common import log
+from utils.common import log, trim_to_len
 
 
 class SmartyBroScrapper(BaseCourseScrapper):
@@ -73,10 +73,10 @@ class SmartyBroScrapper(BaseCourseScrapper):
         return {
             "host_url": url,
             "udemy_url": udemy_url,
-            "headline": cls._find_course_headline(description),
-            "objectives": objectives,
-            "requirements": requirements,
-            "description": description,
+            "headline": trim_to_len(description, COURSE_HEADLINE_LEN),
+            "objectives": trim_to_len(objectives, COURSE_OBJECTIVES_LEN),
+            "requirements": trim_to_len(requirements, COURSE_REQUIREMENTS_LEN),
+            "description": trim_to_len(description, COURSE_DESCRIPTION_LEN),
             "original_poster_url": poster,
             "language": "English",
         }
@@ -132,10 +132,6 @@ class SmartyBroScrapper(BaseCourseScrapper):
         return None
 
     @classmethod
-    def _find_course_headline(cls, content):
-        return f"{content[:HEADLINE_LEN]}..." if content is not None else ""
-
-    @classmethod
     def _find_course_objectives(cls, content):
         target_elements = find_content_on_page(
             content,
@@ -151,7 +147,7 @@ class SmartyBroScrapper(BaseCourseScrapper):
                     f"<li>{objective}</li>"
                     for objective in list(objectives_data.values())[0]
                 ]
-            )[:COURSE_GOALS_LEN]
+            )[:COURSE_OBJECTIVES_LEN]
         return None
 
     @classmethod

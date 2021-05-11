@@ -1,9 +1,14 @@
 from re import compile, sub
 from typing import Dict
 
-from constants.constants import FREEWEB_CART_BASE_URL
+from constants.constants import (
+    FREEWEB_CART_BASE_URL,
+    COURSE_DESCRIPTION_LEN,
+    COURSE_OBJECTIVES_LEN,
+)
 from scrappers.courses.base_course_scrapper import BaseCourseScrapper
 from scrappers.scrapper import find_content_on_page, get_page_content
+from utils.common import trim_to_len
 
 
 class FreeWebCartScrapper(BaseCourseScrapper):
@@ -35,7 +40,7 @@ class FreeWebCartScrapper(BaseCourseScrapper):
             course_details_content
         )
         language = cls._find_course_language(course_details_content)
-        poster_path = cls._find_course_poster(course_details_content)
+        poster = cls._find_course_poster(course_details_content)
         objectives = cls._find_course_objectives(course_details_content)
         description = cls._find_course_description(course_details_content)
         udemy_url = cls._find_course_udemy_url(course_details_content)
@@ -44,9 +49,9 @@ class FreeWebCartScrapper(BaseCourseScrapper):
             "category": category,
             "subcategory": subcategory,
             "language": language,
-            "original_poster_url": poster_path,
-            "objectives": objectives,
-            "description": description,
+            "original_poster_url": poster,
+            "objectives": trim_to_len(objectives, COURSE_OBJECTIVES_LEN),
+            "description": trim_to_len(description, COURSE_DESCRIPTION_LEN),
             "udemy_url": udemy_url,
             "host_url": url,
         }
@@ -92,14 +97,14 @@ class FreeWebCartScrapper(BaseCourseScrapper):
         clean_pattern = compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
         for block in blocks:
             raw_content = "".join([str(subblock) for subblock in block])
-            clean_text = sub(clean_pattern, "", raw_content)
+            clean_text = sub(clean_pattern, "", raw_content).strip()
             if (
                 len(clean_text) == 0
                 or "adsbygoogle" in clean_text
                 or "function(v,d,o,ai)" in clean_text
             ):
                 continue
-            data.append(clean_text.strip())
+            data.append(clean_text)
         return data
 
     @classmethod
