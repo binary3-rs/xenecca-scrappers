@@ -7,12 +7,16 @@ import httplib2
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 
+from dao.learning_resource import LearningResourceDAO
+from dao.learning_resource_category_dao import LearningResourceCategoryDAO
+from database.models.learning_resource import ResourceType
 from database.sqlalchemy_extension import db
 from utils.common import log_exception
 from utils.credentials import obtain_credentials, refresh_token_if_expired
 from utils.file import *
+from utils.learning_resource_categorizer import determine_resource_name_by_filename, determine_category_name_by_filename
 
-SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
+SCOPES = ["https://www.googleapis.com/auth/drive"]
 GOOGLE_DRIVE_CREDENTIALS_PATH = "scrappers/learning_resources/creds.json"
 CREDENTIALS_PICKLE_FILEPATH = "token.pickle"
 
@@ -45,12 +49,30 @@ def _download(downloader, filestream, filepath):
     return done
 
 
+def _load(dao):
+    data = set()
+    for obj in dao.find_all():
+        data.add(obj.name)
+    return data
+
+
+def _load_categories(dao):
+    data = set()
+    for obj in dao.find_all():
+        data.add(obj)
+    return data
+
+
 class DriveScrapper:
     def __init__(self):
         self._credentials = self._get_credentials()
         self._service = self._get_service()
-        self._resources = set()
-        self._resource_dao = None
+
+        self._resource_dao = LearningResourceDAO()
+        self._resource_category_dao = LearningResourceCategoryDAO()
+
+        self._resources = _load(self._resource_dao)
+        self._categories = _load_categories(self._resource_category_dao)
 
     @property
     def credentials(self):
@@ -89,37 +111,52 @@ class DriveScrapper:
         for index, item in enumerate(dir_content):
             file_id, filename, mime_type, shortcut_details = _get_file_props(item)
             filepath = location + filename
-            if not filepath_exists(filepath) and filepath not in self._resources:
-                status, filetype = self._download_resource(item, location)
-                if status:
-                    print(f"{file_id} {filename} {mime_type} ({index + 1}/{total})")
-                    if filetype == "file":
-                        self._try_save_resource(filepath)
+            status, filetype = self._download_resource(item, location)
+            if status:
+                print(f"{file_id} {filename} {mime_type} ({index + 1}/{total})")
+                if filetype == "file":
+                    self._try_save_resource(filepath)
+                    # TODO: uncomment this
+                    # self._delete_file(file_id)
         return True
+
+    def _delete_file(self, file_id):
+        try:
+            self._service.files().delete(fileId=file_id).execute()
+            print(f"File with the id = {file_id} successfully removed from the Google Drive.")
+        except googleapiclient.errors.HttpError as e:
+            log_exception(e, "Google drive delete execution")
 
     def _download_resource(self, resource, location):
         file_id, filename, mime_type, shortcut_details = _get_file_props(resource)
-        if mime_type == "application/vnd.google-apps.folder":
+        filepath = location + filename
+        if mime_type == "application/vnd.google-apps.folder":  # and not filepath_exists(filepath):
             status = self.download_dir(file_id, location, filename)
             return status, "directory"
-        else:
+        elif mime_type != "application/vnd.google-apps.folder" and filepath not in self._resources:
             status = self._download_file(file_id, location, filename, mime_type)
             return status, "file"
+        return False, None
 
     def _try_save_resource(self, filepath):
         try:
             self._save_resource_to_db(filepath)
         except (
-            db.exc.InvalidRequestError,
-            db.exc.IntegrityError,
-            db.exc.ProgrammingError,
-            db.exc.DataError,
+                db.exc.InvalidRequestError,
+                db.exc.IntegrityError,
+                db.exc.ProgrammingError,
+                db.exc.DataError,
         ) as e:
             log_exception(e, "Learning resource")
             remove(filepath)
 
-    def _save_resource_to_db(self, filepath):
-        pass
+    def _save_resource_to_db(self, filepath, material_type="URL"):
+        resource_type, pattern, filename, = filepath.split('/')[-3:]
+        cleaned_filename = determine_resource_name_by_filename(filename, pattern)
+        category = determine_category_name_by_filename(cleaned_filename, self._categories)
+        # resource_type = ResourceType('FILE' if resource_type == 'files')
+
+        print(cleaned_filename, category, resource_type)
 
     def _get_dir_content(self, dir_id):
         result = []
@@ -127,13 +164,13 @@ class DriveScrapper:
         while True:
             files = (
                 self._service.files()
-                .list(
+                    .list(
                     q=f"'{dir_id}' in parents",
                     fields="nextPageToken, files(id, name, mimeType, shortcutDetails)",
                     pageToken=page_token,
                     pageSize=1000,
                 )
-                .execute()
+                    .execute()
             )
             result.extend(files["files"])
             page_token = files.get("nextPageToken")
@@ -159,4 +196,4 @@ class DriveScrapper:
 
 
 ds = DriveScrapper()
-ds.download_dir("16w4J1PZSa_qm-lajv2hBOnEaztEa2vwN", "test", "testio")
+ds.download_dir("16w4J1PZSa_qm-lajv2hBOnEaztEa2vwN", "test/", "testio")
