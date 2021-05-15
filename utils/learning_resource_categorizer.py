@@ -19,13 +19,13 @@ def determine_resource_name_by_filename(filename, filename_pattern):
 
 def determine_category_name_by_filename(filename, categories):
     filename = filename.lower()
-    for category in categories:
-        if category.tags is None:
+    for cat_name, cat_obj in categories.items():
+        if cat_obj.tags is None:
             continue
-        for tag in category.tags.split(','):
+        for tag in cat_obj.tags.split(','):
             tag = tag.lower().strip()
             if tag in filename:
-                return category
+                return cat_obj
     return None
 
 

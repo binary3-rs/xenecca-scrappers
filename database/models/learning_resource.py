@@ -20,6 +20,13 @@ class ResourceType(Enum):
     WEBSITE = 7
     PODCAST = 8
     COLLECTION = 9
+    @classmethod
+    def str_to_enum(cls, name):
+        name_l = name.lower()
+        for value in cls._value2member_map_.values():
+            if value.name.lower() == name_l:
+                return value
+        raise ValueError(f"ResourceType({name}) is not valid!")
 
 
 class LearningResource(Base):

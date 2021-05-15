@@ -1,20 +1,21 @@
 import io
-from os import remove
 from sys import stdout
 
+import apiclient
 import googleapiclient
 import httplib2
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import (MediaFileUpload, MediaIoBaseDownload)
 
 from dao.learning_resource import LearningResourceDAO
 from dao.learning_resource_category_dao import LearningResourceCategoryDAO
-from database.models.learning_resource import ResourceType
+from database.models.learning_resource import MaterialType, ResourceType
 from database.sqlalchemy_extension import db
 from utils.common import log_exception
 from utils.credentials import obtain_credentials, refresh_token_if_expired
 from utils.file import *
-from utils.learning_resource_categorizer import determine_resource_name_by_filename, determine_category_name_by_filename
+from utils.learning_resource_categorizer import (
+    determine_category_name_by_filename, determine_resource_name_by_filename)
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 GOOGLE_DRIVE_CREDENTIALS_PATH = "scrappers/learning_resources/creds.json"
@@ -57,9 +58,9 @@ def _load(dao):
 
 
 def _load_categories(dao):
-    data = set()
+    data = {}
     for obj in dao.find_all():
-        data.add(obj)
+        data[obj.name] = obj
     return data
 
 
@@ -67,6 +68,7 @@ class DriveScrapper:
     def __init__(self):
         self._credentials = self._get_credentials()
         self._service = self._get_service()
+        self._urls_file = None
 
         self._resource_dao = LearningResourceDAO()
         self._resource_category_dao = LearningResourceCategoryDAO()
@@ -100,47 +102,148 @@ class DriveScrapper:
             "Google Drive service cannot be created! Credentials are not set or valid!"
         )
 
-    def download_dir(self, dir_id, location, dir_name):
-        create_dir(location + dir_name)
+    def scrape(self, dir_id, location, dir_name):
+        dir_content = self._get_dir_content(dir_id)
+        for file in dir_content:
+            file_id, filename, mime_type, shortcut_details = _get_file_props(file)
+            if mime_type == "application/vnd.google-apps.folder":
+                self._scrape_resources_dir(file_id, location, dir_name)
+            elif filename == "urls.txt":
+                self._urls_file = file
+                self._scrape_urls_file(file_id, location, filename, mime_type)
+
+    def _scrape_resources_dir(self, dir_id, location, dir_name):
+        create_dir_if_not_exists(location + dir_name)
         location = location + dir_name + "/"
         dir_content = self._get_dir_content(dir_id)
-        total = len(dir_content)
-        print(
-            f"Downloading directory `{dir_name}` with the id = {dir_id} to location {location}..."
-        )
-        for index, item in enumerate(dir_content):
+        scraped, total = 0, 0
+        print(f"Downloading directory with the id = {dir_id} to location {location}...")
+        for item in dir_content:
             file_id, filename, mime_type, shortcut_details = _get_file_props(item)
-            filepath = location + filename
-            status, filetype = self._download_resource(item, location)
-            if status:
-                print(f"{file_id} {filename} {mime_type} ({index + 1}/{total})")
-                if filetype == "file":
-                    self._try_save_resource(filepath)
-                    # TODO: uncomment this
-                    # self._delete_file(file_id)
-        return True
+            file_path = location + filename
+            if mime_type == "application/vnd.google-apps.folder":
+                self._scrape_resources_dir(file_id, location, filename)
+            elif (
+                    mime_type != "application/vnd.google-apps.folder"
+                    and file_path not in self._resources
+            ):
+                total += 1
+                status = self._download_file(file_id, location, filename, mime_type)
+                if status:
+                    try:
+                        data = self._parse_file_name(file_path)
+                        saved = self._try_save_resource(data)
+                        scraped += 1
+                        if saved:
+                            self._delete_file(file_id)
+                        print(
+                            f"{file_id} {filename} {mime_type} ({scraped + 1}/{total})"
+                        )
+                    except ValueError as e:
+                        log_exception(e, "LearningResource")
+                        continue
+
+    def _scrape_urls_file(self, file_id, location, filename, mime_type):
+        unsaved_lines = []
+        status = self._download_file(file_id, location, filename, mime_type)
+        if not status:
+            log("File with urls couldn't have been downloaded!")
+        else:
+            file_content = read_file(location + filename)
+            for line in file_content:
+                try:
+                    data = self._parse_file_line(line)
+                    is_saved = self._create_learning_resource(data)
+                    if not is_saved:
+                        unsaved_lines.append(line)
+                except ValueError as e:
+                    unsaved_lines.append(line)
+                    log_exception(e, "LearningResource")
+                    continue
+            if len(unsaved_lines) > 0 and self._urls_file is not None:
+                self._update_urls_file(unsaved_lines, location, filename, file_id)
+
+    def _update_urls_file(self, resources, location, filename, file_id):
+        create_dir_if_not_exists(location + "tmp/")
+        new_file_name = location + "tmp/" + filename
+        write_to_file(new_file_name, resources)
+        try:
+            media_body = MediaFileUpload(
+                new_file_name, mimetype="text/plain", resumable=True
+            )
+            self.service.files().update(fileId=file_id, media_body=media_body).execute()
+        except apiclient.errors.HttpError as e:
+            log_exception(e, "Update urls file")
+
+    def _create_learning_resource(self, data, filepath=None, parse_type="text_line"):
+        status = self._try_save_resource(data)
+        if status:
+            log(
+                f"LearningResource with name = {data['name']} and value = {data['resource']} successfully created."
+            )
+        elif parse_type == "file":
+            remove(filepath)
+        return status
+
+    def _parse_file_line(self, line):
+        params = line[:-1].split("--!!--")
+        if len(params) < 4:
+            raise ValueError(
+                "Wrong resource parameters format. Some params are missing!"
+            )
+        category = self._categories.get(params[2])
+        if category is None:
+            raise ValueError(
+                f"There is no resource category with such a name({params[2]})"
+            )
+        return {
+            "name": params[0],
+            "resource": params[1],
+            "resource_category": category,
+            "resource_type": ResourceType.str_to_enum(params[3]),
+            "material_type": MaterialType.URL,
+        }
+
+    def _parse_file_name(self, filepath):
+        params = filepath.split("/")
+        if len(params) < 3:
+            raise ValueError(
+                "Wrong resource parameters format. Some params are missing!"
+            )
+        (
+            resource_type,
+            pattern,
+            filename,
+        ) = params[-3:]
+        name = determine_resource_name_by_filename(filename, pattern)
+        resource_type = resource_type.lower()
+        if resource_type[-1] == "s":
+            resource_type = resource_type[:-1]
+        category = determine_category_name_by_filename(name, self._categories)
+        if category is None:
+            raise ValueError("There is no resource category with such a name")
+        return {
+            "name": name,
+            "resource": filepath,
+            "resource_category": category,
+            "resource_type": ResourceType.str_to_enum(resource_type),
+            "material_type": MaterialType.FILE,
+        }
 
     def _delete_file(self, file_id):
         try:
             self._service.files().delete(fileId=file_id).execute()
-            print(f"File with the id = {file_id} successfully removed from the Google Drive.")
+            print(
+                f"File with the id = {file_id} successfully removed from the Google Drive."
+            )
         except googleapiclient.errors.HttpError as e:
             log_exception(e, "Google drive delete execution")
 
-    def _download_resource(self, resource, location):
-        file_id, filename, mime_type, shortcut_details = _get_file_props(resource)
-        filepath = location + filename
-        if mime_type == "application/vnd.google-apps.folder":  # and not filepath_exists(filepath):
-            status = self.download_dir(file_id, location, filename)
-            return status, "directory"
-        elif mime_type != "application/vnd.google-apps.folder" and filepath not in self._resources:
-            status = self._download_file(file_id, location, filename, mime_type)
-            return status, "file"
-        return False, None
-
-    def _try_save_resource(self, filepath):
+    def _try_save_resource(self, resource):
+        successful = False
         try:
-            self._save_resource_to_db(filepath)
+            self._resource_dao.create(**resource)
+            successful = True
         except (
                 db.exc.InvalidRequestError,
                 db.exc.IntegrityError,
@@ -148,15 +251,8 @@ class DriveScrapper:
                 db.exc.DataError,
         ) as e:
             log_exception(e, "Learning resource")
-            remove(filepath)
-
-    def _save_resource_to_db(self, filepath, material_type="URL"):
-        resource_type, pattern, filename, = filepath.split('/')[-3:]
-        cleaned_filename = determine_resource_name_by_filename(filename, pattern)
-        category = determine_category_name_by_filename(cleaned_filename, self._categories)
-        # resource_type = ResourceType('FILE' if resource_type == 'files')
-
-        print(cleaned_filename, category, resource_type)
+        finally:
+            return successful
 
     def _get_dir_content(self, dir_id):
         result = []
@@ -196,4 +292,7 @@ class DriveScrapper:
 
 
 ds = DriveScrapper()
-ds.download_dir("16w4J1PZSa_qm-lajv2hBOnEaztEa2vwN", "test/", "testio")
+ds.scrape("16w4J1PZSa_qm-lajv2hBOnEaztEa2vwN", "test/", "testio")
+# ds._scrape_urls_file(
+#     "1bGDKYPdtBVJz9uAjJ02JEX-NgA7f3_oN", "test/testio/", "urls.txt", "text/plain"
+# )
