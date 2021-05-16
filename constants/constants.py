@@ -1,5 +1,3 @@
-from os import getenv
-
 COMMON_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                   "Chrome/81.0.4044.138 Safari/537.36",
@@ -38,12 +36,6 @@ COURSE_DATA = {
     "suffix": "?fields[course]=primary_category,primary_subcategory,context_info,locale",
 }
 
-# elastic search data
-
-ES_PORT = getenv("ES_PORT", 9200)
-ES_COURSES_INDEX = getenv("ES_COURSES_INDEX", "xenecca-course")
-COURSES_ES_ENDPOINT = f"http://localhost:{ES_PORT}/{ES_COURSES_INDEX}/_doc/"
-
 # length constants
 COURSE_DESCRIPTION_LEN = 6000
 COURSE_OBJECTIVES_LEN = 1000
@@ -57,9 +49,16 @@ NUM_OF_CONSEC_EMPTY_PAGES_THRESHOLD = 3
 #
 CATEGORIES_JSON_PATH = "resources/categories.json"
 
-
+# naming pattenrs of directories in GD repository
 DASH_PATTERN = "-"
 UNDERSCORE_PATTERN = "_"
 CAPITAL_LETTERS_PATTERN = "AAA"
 PREFIX_PATTERN = []
 SUFFIX_PATTERN = []
+
+# auth scope for GD API
+SCOPES = ["https://www.googleapis.com/auth/drive"]
+CREDENTIALS_PICKLE_FILEPATH = "token.pickle"
+
+
+

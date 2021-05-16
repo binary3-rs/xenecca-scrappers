@@ -5,8 +5,9 @@ import apiclient
 import googleapiclient
 import httplib2
 from googleapiclient.discovery import build
-from googleapiclient.http import (MediaFileUpload, MediaIoBaseDownload)
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
+from constants.constants import SCOPES, CREDENTIALS_PICKLE_FILEPATH
 from dao.learning_resource import LearningResourceDAO
 from dao.learning_resource_category_dao import LearningResourceCategoryDAO
 from database.models.learning_resource import MaterialType, ResourceType
@@ -15,11 +16,12 @@ from utils.common import log_exception
 from utils.credentials import obtain_credentials, refresh_token_if_expired
 from utils.file import *
 from utils.learning_resource_categorizer import (
-    determine_category_name_by_filename, determine_resource_name_by_filename)
+    determine_category_name_by_filename,
+    determine_resource_name_by_filename,
+)
+from utils.search import store_obj_in_es_index
 
-SCOPES = ["https://www.googleapis.com/auth/drive"]
 GOOGLE_DRIVE_CREDENTIALS_PATH = "scrappers/learning_resources/creds.json"
-CREDENTIALS_PICKLE_FILEPATH = "token.pickle"
 
 
 def _get_file_props(file):
@@ -127,21 +129,22 @@ class DriveScrapper:
                     mime_type != "application/vnd.google-apps.folder"
                     and file_path not in self._resources
             ):
-                total += 1
+                total = total + 1
+                try:
+                    data = self._parse_file_name(file_path)
+                except ValueError as e:
+                    log_exception(e, "LearningResource")
+                    continue
                 status = self._download_file(file_id, location, filename, mime_type)
                 if status:
-                    try:
-                        data = self._parse_file_name(file_path)
-                        saved = self._try_save_resource(data)
-                        scraped += 1
-                        if saved:
-                            self._delete_file(file_id)
-                        print(
-                            f"{file_id} {filename} {mime_type} ({scraped + 1}/{total})"
-                        )
-                    except ValueError as e:
-                        log_exception(e, "LearningResource")
-                        continue
+                    resource = self._try_save_resource(data)
+                    scraped = scraped + 1
+                    if resource is not None:
+                        self._delete_file(file_id)
+                        store_obj_in_es_index(resource)
+                    print(
+                        f"{file_id} {filename} {mime_type} ({scraped}/{total})"
+                    )
 
     def _scrape_urls_file(self, file_id, location, filename, mime_type):
         unsaved_lines = []
@@ -153,8 +156,10 @@ class DriveScrapper:
             for line in file_content:
                 try:
                     data = self._parse_file_line(line)
-                    is_saved = self._create_learning_resource(data)
-                    if not is_saved:
+                    resource = self._create_learning_resource(data)
+                    if resource is not None:
+                        store_obj_in_es_index(resource)
+                    else:
                         unsaved_lines.append(line)
                 except ValueError as e:
                     unsaved_lines.append(line)
@@ -176,14 +181,15 @@ class DriveScrapper:
             log_exception(e, "Update urls file")
 
     def _create_learning_resource(self, data, filepath=None, parse_type="text_line"):
-        status = self._try_save_resource(data)
-        if status:
+        resource = self._try_save_resource(data)
+        if resource is not None:
             log(
                 f"LearningResource with name = {data['name']} and value = {data['resource']} successfully created."
             )
+
         elif parse_type == "file":
             remove(filepath)
-        return status
+        return resource
 
     def _parse_file_line(self, line):
         params = line[:-1].split("--!!--")
@@ -240,10 +246,9 @@ class DriveScrapper:
             log_exception(e, "Google drive delete execution")
 
     def _try_save_resource(self, resource):
-        successful = False
+        resource_obj = None
         try:
-            self._resource_dao.create(**resource)
-            successful = True
+            resource_obj = self._resource_dao.create(**resource)
         except (
                 db.exc.InvalidRequestError,
                 db.exc.IntegrityError,
@@ -252,7 +257,7 @@ class DriveScrapper:
         ) as e:
             log_exception(e, "Learning resource")
         finally:
-            return successful
+            return resource_obj
 
     def _get_dir_content(self, dir_id):
         result = []

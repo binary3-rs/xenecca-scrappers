@@ -3,19 +3,26 @@ from json import dumps, loads
 
 from requests import put
 
-from constants.constants import COURSES_ES_ENDPOINT
+from constants.config import COURSES_ES_ENDPOINT, LEARNING_RESOURCES_ES_ENDPOINT
+from database.models.course import Course
 from utils.common import log_with_timestamp
 
 
-def store_course_in_es_index(course):
-    record = _convert_course_object_to_es_record(course)
-    _store_course_es_record(course.id, record)
+def store_obj_in_es_index(obj):
+    if isinstance(obj, Course):
+        record_type = "course"
+        mapped_object = _map_course_object_to_es_record(obj)
+    else:
+        record_type = "learning_resource"
+        mapped_object = _map_learning_resource_object_to_es_record(obj)
+    _store_es_record(obj.id, mapped_object, record_type)
 
 
-def _store_course_es_record(id, record):
+def _store_es_record(obj_id, record, record_type="course"):
+    endpoint_url = COURSES_ES_ENDPOINT if record_type == "course" else LEARNING_RESOURCES_ES_ENDPOINT
     try:
         res = put(
-            f"{COURSES_ES_ENDPOINT}{id}",
+            f"{endpoint_url}{obj_id}",
             dumps(record),
             headers={"Content-Type": "application/json"},
         )
@@ -26,9 +33,9 @@ def _store_course_es_record(id, record):
         log_with_timestamp(f"Creating a record failed. Error message = {e}.")
 
 
-def _convert_course_object_to_es_record(course):
+def _map_course_object_to_es_record(course):
     return {
-        "_class": "com.xenecca.api.es.models.CourseDoc",
+        "_class": "com.xenecca.api.model.elastic.CourseDoc",
         "title": course.title,
         "doc_id": course.id,
         "headline": course.headline,
@@ -38,4 +45,17 @@ def _convert_course_object_to_es_record(course):
         "poster": course.poster_path,
         "original_poster_url": course.original_poster_url,
         "updated_at": course.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+
+def _map_learning_resource_object_to_es_record(learning_resource):
+    return {
+        "_class": "com.xenecca.api.model.elastic.LearningResourceDoc",
+        "doc_id": learning_resource.id,
+        "name": learning_resource.name,
+        "resource": learning_resource.resource,
+        "category": learning_resource.resource_category.id if learning_resource.resource_category else None,  # impossible case
+        "material_type": str(learning_resource.material_type),
+        "resource_type": str(learning_resource.resource_type),
+        "updated_at": learning_resource.updated_at.strftime("%Y-%m-%d %H:%M:%S")
     }
