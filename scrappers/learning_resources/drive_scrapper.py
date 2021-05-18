@@ -7,7 +7,7 @@ import httplib2
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
-from constants.constants import SCOPES, CREDENTIALS_PICKLE_FILEPATH
+from config.constants import SCOPES, CREDENTIALS_PICKLE_FILEPATH
 from dao.learning_resource import LearningResourceDAO
 from dao.learning_resource_category_dao import LearningResourceCategoryDAO
 from database.models.learning_resource import MaterialType, ResourceType
@@ -31,7 +31,7 @@ def _get_file_props(file):
     shortcut_details = file.get("shortcutDetails", None)
     if shortcut_details is not None:
         file_id = shortcut_details["targetId"]
-    return file_id, filename, mime_type, shortcut_details
+    return file_id, filename, mime_type
 
 
 def _download(downloader, filestream, filepath):
@@ -77,7 +77,6 @@ class DriveScrapper:
 
         self._resources = _load(self._resource_dao)
         self._categories = _load_categories(self._resource_category_dao)
-
     @property
     def credentials(self):
         return self._credentials
@@ -107,7 +106,7 @@ class DriveScrapper:
     def scrape(self, dir_id, location, dir_name):
         dir_content = self._get_dir_content(dir_id)
         for file in dir_content:
-            file_id, filename, mime_type, shortcut_details = _get_file_props(file)
+            file_id, filename, mime_type = _get_file_props(file)
             if mime_type == "application/vnd.google-apps.folder":
                 self._scrape_resources_dir(file_id, location, dir_name)
             elif filename == "urls.txt":
@@ -121,7 +120,7 @@ class DriveScrapper:
         scraped, total = 0, 0
         print(f"Downloading directory with the id = {dir_id} to location {location}...")
         for item in dir_content:
-            file_id, filename, mime_type, shortcut_details = _get_file_props(item)
+            file_id, filename, mime_type = _get_file_props(item)
             file_path = location + filename
             if mime_type == "application/vnd.google-apps.folder":
                 self._scrape_resources_dir(file_id, location, filename)
@@ -294,10 +293,3 @@ class DriveScrapper:
         else:
             request = self._service.files().get_media(fileId=file_id)
         return request, filename
-
-
-ds = DriveScrapper()
-ds.scrape("16w4J1PZSa_qm-lajv2hBOnEaztEa2vwN", "test/", "testio")
-# ds._scrape_urls_file(
-#     "1bGDKYPdtBVJz9uAjJ02JEX-NgA7f3_oN", "test/testio/", "urls.txt", "text/plain"
-# )

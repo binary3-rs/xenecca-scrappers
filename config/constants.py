@@ -61,4 +61,6 @@ SCOPES = ["https://www.googleapis.com/auth/drive"]
 CREDENTIALS_PICKLE_FILEPATH = "token.pickle"
 
 
+RESOURCES_LOCATION = "../resources/"
+RESOURCES_DIR_NAME = "files"
 
