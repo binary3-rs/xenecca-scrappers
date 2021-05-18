@@ -3,7 +3,7 @@ from json import dumps, loads
 
 from requests import put
 
-from constants.config import COURSES_ES_ENDPOINT, LEARNING_RESOURCES_ES_ENDPOINT
+from config.config import COURSES_ES_ENDPOINT, LEARNING_RESOURCES_ES_ENDPOINT
 from database.models.course import Course
 from utils.common import log_with_timestamp
 

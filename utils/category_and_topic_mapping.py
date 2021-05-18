@@ -1,7 +1,7 @@
 from os import path, sep
 
 from utils.common import load_from_json
-from constants.constants import CATEGORIES_JSON_PATH
+from config.constants import CATEGORIES_JSON_PATH
 PARENT_FILE_PATH = path.dirname(path.realpath("__file__"))
 
 categories = load_from_json(f'{PARENT_FILE_PATH}{sep}{CATEGORIES_JSON_PATH}')

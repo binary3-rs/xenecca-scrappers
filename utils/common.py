@@ -4,8 +4,7 @@ from os import path, sep
 from json import load
 from requests import get
 
-from constants.config import COURSES_MEDIA_DIR_PATH
-from constants.constants import COURSE_DATA, LANDING_COMPONENTS
+from config.constants import COURSE_DATA, LANDING_COMPONENTS, COURSES_MEDIA_DIR_PATH
 from database.sqlalchemy_extension import db
 
 LOCAL_FILE_PATH = path.dirname(path.realpath("__file__"))
@@ -42,15 +41,15 @@ def create_target_url(target, udemy_id):
 
 
 # logging utils
-def log(text, type="info"):
-    log = info
-    if type == "debug":
-        log = debug
-    elif type == "warn":
-        log = warning
-    elif type == "error":
-        log = error
-    log({text})
+def log(text, log_type="info"):
+    logger = info
+    if log_type == "debug":
+        logger = debug
+    elif log_type == "warn":
+        logger = warning
+    elif log_type == "error":
+        logger = error
+    logger({text})
 
 
 def log_with_timestamp(text, type="info"):

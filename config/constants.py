@@ -36,10 +36,13 @@ COURSE_DATA = {
     "suffix": "?fields[course]=primary_category,primary_subcategory,context_info,locale",
 }
 
+# media folder - location for posters storage
+COURSES_MEDIA_DIR_PATH = "images/courses/"
+
 # length constants
 COURSE_DESCRIPTION_LEN = 6000
-COURSE_OBJECTIVES_LEN = 1000
-COURSE_REQUIREMENTS_LEN = 1000
+COURSE_OBJECTIVES_LEN = 1200
+COURSE_REQUIREMENTS_LEN = 1200
 COURSE_HEADLINE_LEN = 252
 
 # misc
@@ -60,7 +63,7 @@ SUFFIX_PATTERN = []
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 CREDENTIALS_PICKLE_FILEPATH = "token.pickle"
 
-
-RESOURCES_LOCATION = "../resources/"
+# resources location
+RESOURCES_LOCATION = "../learning-resources/"
 RESOURCES_DIR_NAME = "files"
 

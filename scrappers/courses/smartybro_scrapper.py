@@ -1,7 +1,7 @@
 from json import loads
 from typing import Dict
 
-from constants.constants import (
+from config.constants import (
     COURSE_DESCRIPTION_LEN,
     COURSE_OBJECTIVES_LEN,
     COURSE_REQUIREMENTS_LEN,
@@ -125,7 +125,7 @@ class SmartyBroScrapper(BaseCourseScrapper):
             data = description_element.attrs["data-component-props"]
             description = loads(data).get("description")
             return (
-                description[:COURSE_DESCRIPTION_LEN]
+                description
                 if description is not None
                 else description
             )
@@ -147,7 +147,7 @@ class SmartyBroScrapper(BaseCourseScrapper):
                     f"<li>{objective}</li>"
                     for objective in list(objectives_data.values())[0]
                 ]
-            )[:COURSE_OBJECTIVES_LEN]
+            )
         return None
 
     @classmethod
@@ -161,7 +161,7 @@ class SmartyBroScrapper(BaseCourseScrapper):
             requirements = loads(data)
             return "".join(
                 [f"<li>{item}</li>" for item in requirements["prerequisites"]]
-            )[:COURSE_REQUIREMENTS_LEN]
+            )
         return None
 
     @classmethod

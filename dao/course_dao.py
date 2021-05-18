@@ -10,6 +10,12 @@ class CourseDAO:
         course = Course(**kwargs)
         return self.save(course)
 
+    def find_by_title(self, title):
+        return self._session.query(Course).filter_by(title=title).all()
+
+    def find_by_udemy_url(self, udemy_url):
+        return self._session.query(Course).filter_by(udemy_url=udemy_url).all()
+
     def update(self, course=None, **kwargs):
         try:
             if course is not None:

@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint
-
 from database.models.category import Category
 from database.models.subcategory import Subcategory
 

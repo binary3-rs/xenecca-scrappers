@@ -3,7 +3,7 @@
 # _
 # capital letter
 # prefix capital letter
-from constants.constants import DASH_PATTERN, UNDERSCORE_PATTERN, CAPITAL_LETTERS_PATTERN
+from config.constants import DASH_PATTERN, UNDERSCORE_PATTERN, CAPITAL_LETTERS_PATTERN
 
 PREFIX_PATTERNS = []
 SUFFIX_PATTERNS = []
@@ -20,6 +20,8 @@ def determine_resource_name_by_filename(filename, filename_pattern):
 def determine_category_name_by_filename(filename, categories):
     filename = filename.lower()
     for cat_name, cat_obj in categories.items():
+        if cat_obj.name.lower() in filename:
+            return cat_obj
         if cat_obj.tags is None:
             continue
         for tag in cat_obj.tags.split(','):

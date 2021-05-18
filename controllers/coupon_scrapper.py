@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from constants.constants import NUM_OF_CONSEC_DAYS
+from config.constants import NUM_OF_CONSEC_DAYS
 from dao.category_dao import CategoryDAO
 from dao.course_dao import CourseDAO
 
@@ -8,7 +8,7 @@ from dao.language_dao import LanguageDAO
 from dao.subcategory_dao import SubcategoryDAO
 
 from utils.file import delete_file
-from utils.search import store_course_in_es_index
+from utils.search import store_obj_in_es_index
 from utils.common import (
     download_image,
     load_data_into_dict,
@@ -18,6 +18,11 @@ from utils.common import (
     put_if_not_null,
     try_save,
 )
+
+
+def load_cleaned_udemy_urls(dao):
+    all_records = dao.find_all()
+    return {item.udemy_url: item for item in all_records}
 
 
 class ScrapperRunner:
@@ -31,6 +36,7 @@ class ScrapperRunner:
         self._languages = load_data_into_dict(self.language_dao, "name")
         self._categories = load_data_into_dict(self.category_dao, "name")
         self._subcategories = load_data_into_dict(self.subcategory_dao, "name")
+        self._course_urls = load_cleaned_udemy_urls(self.course_dao)
 
     def scrape(self, scrapper, *arg):
         courses = scrapper.find_basic_courses_details(*arg)
@@ -40,9 +46,15 @@ class ScrapperRunner:
         courses_to_scrape = self._filter_present_courses(courses)
         courses_to_scrape.reverse()
         for course_data in courses_to_scrape:
-            course_data = {**course_data, **scrapper.find_all_course_details(course_data.get("host_url"))}
+            course_data = {
+                **course_data,
+                **scrapper.find_all_course_details(course_data.get("host_url")),
+            }
+            if course_data["udemy_url"] in self._course_urls:
+                continue
             num_of_scrapped_courses += 1
-            course = self._courses.get(course_data.get(course_data["title"]))
+            course = self._courses.get(course_data["title"])
+            # NOTE: titles can vary on different websites for the same course
             course = self._save_scraped_data(course, course_data)
             num_of_saved_courses = num_of_saved_courses + (course is not None)
         return num_of_scrapped_courses, num_of_saved_courses
@@ -58,10 +70,10 @@ class ScrapperRunner:
         updated_course = self._save_course_data_to_db(course, course_data)
         if updated_course is not None:
             try:
-                store_course_in_es_index(updated_course)
+                store_obj_in_es_index(updated_course)
+                self.update_caches(updated_course)
             except Exception as e:
                 log_with_timestamp(f"FATAL ERROR: {e}", "error")
-            self.update_caches(updated_course)
         else:
             delete_file(course_data["poster_path"])
         return updated_course
@@ -74,16 +86,27 @@ class ScrapperRunner:
         )
 
     def _save_course_data_to_db(self, course, course_data):
-        category = get_or_save(self._categories, self._try_save_category, course_data.get("category"),
-                               **{"category_name": course_data.get(
-                                   "category")})
-        subcategory = get_or_save(self._subcategories, self._try_save_subcategory,
-                                  course_data.get("subcategory"),
-                                  **{"subcategory_name": course_data.get("subcategory"),
-                                     "category": category})
-        language = get_or_save(self._languages, self._try_save_language,
-                               course_data.get("language"),
-                               **{"language_name": course_data.get("language")})
+        category = get_or_save(
+            self._categories,
+            self._try_save_category,
+            course_data.get("category"),
+            **{"category_name": course_data.get("category")},
+        )
+        subcategory = get_or_save(
+            self._subcategories,
+            self._try_save_subcategory,
+            course_data.get("subcategory"),
+            **{
+                "subcategory_name": course_data.get("subcategory"),
+                "category": category,
+            },
+        )
+        language = get_or_save(
+            self._languages,
+            self._try_save_language,
+            course_data.get("language"),
+            **{"language_name": course_data.get("language")},
+        )
         course_data["category"] = category
         course_data["subcategory"] = subcategory
         course_data["language"] = language
@@ -111,7 +134,6 @@ class ScrapperRunner:
             raise e
         finally:
             return subcategory
-
 
     def download_poster(self, poster_url):
         poster_filepath = None
@@ -143,6 +165,7 @@ class ScrapperRunner:
                 course = self.course_dao.update(course, **data)
         except Exception as e:
             log_exception(e, "Course")
+            course = None
         finally:
             return course
 
@@ -159,10 +182,22 @@ class ScrapperRunner:
 
     def update_caches(self, course):
         put_if_not_null(self._courses, course.title if course else None, course)
-        put_if_not_null(self._languages, course.language.name if course.language else None, course.language)
-        put_if_not_null(self._categories, course.category.name if course.category else None, course.category)
-        put_if_not_null(self._subcategories, course.subcategory.name if course.subcategory else None,
-                        course.subcategory)
+        put_if_not_null(self._course_urls, course.udemy_url if course else None, course)
+        put_if_not_null(
+            self._languages,
+            course.language.name if course.language else None,
+            course.language,
+        )
+        put_if_not_null(
+            self._categories,
+            course.category.name if course.category else None,
+            course.category,
+        )
+        put_if_not_null(
+            self._subcategories,
+            course.subcategory.name if course.subcategory else None,
+            course.subcategory,
+        )
 
 
 def get_or_save(cache, persisting_function, key, **data):

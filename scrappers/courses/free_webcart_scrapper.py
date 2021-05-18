@@ -1,7 +1,7 @@
 from re import compile, sub
 from typing import Dict
 
-from constants.constants import (
+from config.constants import (
     FREEWEB_CART_BASE_URL,
     COURSE_DESCRIPTION_LEN,
     COURSE_OBJECTIVES_LEN,
@@ -126,7 +126,7 @@ class FreeWebCartScrapper(BaseCourseScrapper):
         for goal in course_goals_element:
             goal_text = goal.text.strip()
             course_goals.append(goal_text)
-        return [fr"<li>{goal}<\li>" for goal in course_goals]
+        return "".join([fr"<li>{goal}<\li>" for goal in course_goals])
 
     @classmethod
     def _find_course_language(cls, content):
