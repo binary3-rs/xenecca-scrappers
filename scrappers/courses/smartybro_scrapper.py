@@ -78,7 +78,7 @@ class SmartyBroScrapper(BaseCourseScrapper):
             "requirements": trim_to_len(requirements, COURSE_REQUIREMENTS_LEN),
             "description": trim_to_len(description, COURSE_DESCRIPTION_LEN),
             "original_poster_url": poster,
-            "language": "English",
+            "language": "N/A",
         }
 
     @classmethod

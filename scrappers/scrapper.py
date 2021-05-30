@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from requests import get
 from requests.exceptions import ConnectionError
 
-from constants.constants import COMMON_HEADERS
+from config.constants import COMMON_HEADERS
 from utils.common import log_with_timestamp
 
 
