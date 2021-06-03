@@ -11,7 +11,7 @@ from config.constants import (
 from scrappers.courses.base_course_scrapper import BaseCourseScrapper
 from scrappers.scrapper import find_content_on_page, get_page_content
 from utils.category_and_topic_mapping import find_category_data
-from utils.common import log, trim_to_len
+from utils.common import log, trim_to_len, udemy_url_to_slug
 
 
 class SmartyBroScrapper(BaseCourseScrapper):
@@ -79,6 +79,7 @@ class SmartyBroScrapper(BaseCourseScrapper):
             "description": trim_to_len(description, COURSE_DESCRIPTION_LEN),
             "original_poster_url": poster,
             "language": "N/A",
+            "slug": udemy_url_to_slug(udemy_url)
         }
 
     @classmethod

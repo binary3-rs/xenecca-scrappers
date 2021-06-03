@@ -8,7 +8,7 @@ from config.constants import (
 )
 from scrappers.courses.base_course_scrapper import BaseCourseScrapper
 from scrappers.scrapper import find_content_on_page, get_page_content
-from utils.common import trim_to_len
+from utils.common import trim_to_len, udemy_url_to_slug
 
 
 class FreeWebCartScrapper(BaseCourseScrapper):
@@ -54,6 +54,7 @@ class FreeWebCartScrapper(BaseCourseScrapper):
             "description": trim_to_len(description, COURSE_DESCRIPTION_LEN),
             "udemy_url": udemy_url,
             "host_url": url,
+            "slug": udemy_url_to_slug(udemy_url)
         }
 
     def _find_course_url(cls, course_item):

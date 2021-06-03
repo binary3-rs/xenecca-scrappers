@@ -19,7 +19,7 @@ from utils.learning_resource_categorizer import (
     determine_category_name_by_filename,
     determine_resource_name_by_filename,
 )
-from utils.search import store_obj_in_es_index
+from utils.elastic_indexing import store_obj_in_es_index
 
 GOOGLE_DRIVE_CREDENTIALS_PATH = "scrappers/learning_resources/creds.json"
 

@@ -8,7 +8,7 @@ from dao.language_dao import LanguageDAO
 from dao.subcategory_dao import SubcategoryDAO
 
 from utils.file import delete_file
-from utils.search import store_obj_in_es_index
+from utils.elastic_indexing import store_obj_in_es_index
 from utils.common import (
     download_image,
     load_data_into_dict,
@@ -25,6 +25,11 @@ def load_cleaned_udemy_urls(dao):
     return {item.udemy_url: item for item in all_records}
 
 
+def load_course_slugs(dao):
+    all_records = dao.find_all()
+    return {item.slug: item for item in all_records}
+
+
 class ScrapperRunner:
     def __init__(self):
         self.language_dao = LanguageDAO()
@@ -36,7 +41,8 @@ class ScrapperRunner:
         self._languages = load_data_into_dict(self.language_dao, "name")
         self._categories = load_data_into_dict(self.category_dao, "name")
         self._subcategories = load_data_into_dict(self.subcategory_dao, "name")
-        self._course_urls = load_cleaned_udemy_urls(self.course_dao)
+        # self._course_urls = load_cleaned_udemy_urls(self.course_dao)
+        self._slugs = load_course_slugs(self.course_dao)
 
     def scrape(self, scrapper, *arg):
         courses = scrapper.find_basic_courses_details(*arg)
@@ -50,7 +56,7 @@ class ScrapperRunner:
                 **course_data,
                 **scrapper.find_all_course_details(course_data.get("host_url")),
             }
-            if course_data["udemy_url"] in self._course_urls:
+            if course_data["slug"] in self._slugs:
                 continue
             num_of_scrapped_courses += 1
             course = self._courses.get(course_data["title"])
@@ -182,7 +188,8 @@ class ScrapperRunner:
 
     def update_caches(self, course):
         put_if_not_null(self._courses, course.title if course else None, course)
-        put_if_not_null(self._course_urls, course.udemy_url if course else None, course)
+        put_if_not_null(self._slugs, course.slug if course else None, course)
+        #put_if_not_null(self._course_urls, course.udemy_url if course else None, course)
         put_if_not_null(
             self._languages,
             course.language.name if course.language else None,

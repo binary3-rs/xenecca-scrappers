@@ -1,4 +1,3 @@
-from utils.file import create_dir_if_not_exists
 from scrappers.learning_resources.drive_scrapper import DriveScrapper
 
 ds = DriveScrapper()

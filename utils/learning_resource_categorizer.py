@@ -10,6 +10,7 @@ SUFFIX_PATTERNS = []
 
 
 def determine_resource_name_by_filename(filename, filename_pattern):
+    filename = _remove_file_type_extension(filename)
     if filename_pattern in (DASH_PATTERN, UNDERSCORE_PATTERN):
         return " ".join(filename.split(filename_pattern))
     elif filename_pattern == CAPITAL_LETTERS_PATTERN:
@@ -31,12 +32,15 @@ def determine_category_name_by_filename(filename, categories):
     return None
 
 
+def _remove_file_type_extension(filename):
+    return filename.split('.')[0]
+
+
 def _determine_resource_name_with_capital_pattern(filename):
     words = []
     i = 0
     while i < len(filename):
         start = i
-
         if filename[i:i + 3].upper() in ("PHP", "CSS", "SQL"):
             i += 3
         elif filename[i:i + 5].upper() in ("HTML5",):

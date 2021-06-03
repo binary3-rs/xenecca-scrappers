@@ -19,6 +19,8 @@ class Course(Base):
     original_poster_url = db.Column(db.String)
     requirements = db.Column(db.Text(1000))
     host_url = db.Column(db.String(300), unique=True, nullable=False)
+    published_on_discord = db.Column(db.Boolean, default=False)
+    slug = db.Column(db.String(350), unique=True, nullable=False)
     title = db.Column(db.String(255), unique=True, nullable=False)
     udemy_url = db.Column(db.String(300), unique=True, nullable=False)
 
@@ -58,6 +60,8 @@ class Course(Base):
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+        # upon creation or change, we should republish this on Discord
+        self.published_on_discord = False
         return self
 
     def __str__(self):

@@ -14,9 +14,10 @@ logging.basicConfig(
     level=logging.DEBUG,
 )
 if __name__ == "__main__":
-    drive_scrapper = DriveScrapper()
+
     log(f"-----------Scrape results for the date: {datetime.utcnow()})-----------")
     try:
+        drive_scrapper = DriveScrapper()
         drive_scrapper.scrape(GOOGLE_DISK_DIR_ID, RESOURCES_LOCATION, RESOURCES_DIR_NAME)
     except Exception as e:
         log_exception(e)

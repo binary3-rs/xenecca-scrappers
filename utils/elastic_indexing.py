@@ -39,6 +39,7 @@ def _map_course_object_to_es_record(course):
         "title": course.title,
         "doc_id": course.id,
         "headline": course.headline,
+        "slug": course.slug,
         "category": course.category.id if course.category else None,
         "subcategory": course.subcategory.id if course.subcategory else None,
         "language": course.language.id if course.language else None,

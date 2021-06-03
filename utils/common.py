@@ -127,3 +127,5 @@ def trim_to_len(data, trim_len):
     return f"{data[:trim_len-3]}..." if (data is not None and len(data) > trim_len) else data
 
 
+def udemy_url_to_slug(url):
+    return url.split('course/')[1].split('/?')[0]
