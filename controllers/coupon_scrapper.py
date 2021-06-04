@@ -56,7 +56,7 @@ class ScrapperRunner:
                 **course_data,
                 **scrapper.find_all_course_details(course_data.get("host_url")),
             }
-            if course_data["slug"] in self._slugs:
+            if course_data["slug"] in self._slugs or course_data["slug"] is None:
                 continue
             num_of_scrapped_courses += 1
             course = self._courses.get(course_data["title"])

@@ -128,4 +128,9 @@ def trim_to_len(data, trim_len):
 
 
 def udemy_url_to_slug(url):
-    return url.split('course/')[1].split('/?')[0]
+    if url == "#":
+        return None
+    try:
+        return url.split('course/')[1].split('/?')[0]
+    except IndexError:
+        return None

@@ -33,7 +33,6 @@ class FreeWebCartScrapper(BaseCourseScrapper):
 
     @classmethod
     def _find_course_details(cls, url):
-
         course_details_content = get_page_content(url)
         headline = cls._find_course_headline(course_details_content)
         category, subcategory = cls._find_course_category_and_subcategory(
