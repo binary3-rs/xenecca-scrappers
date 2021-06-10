@@ -77,6 +77,7 @@ class DriveScrapper:
 
         self._resources = _load(self._resource_dao)
         self._categories = _load_categories(self._resource_category_dao)
+
     @property
     def credentials(self):
         return self._credentials
@@ -114,23 +115,24 @@ class DriveScrapper:
                 self._scrape_urls_file(file_id, location, filename, mime_type)
 
     def _scrape_resources_dir(self, dir_id, location, dir_name):
-        create_dir_if_not_exists(location + dir_name)
-        location = location + dir_name + "/"
+        dir_name = dir_name.split("/")[0]
+        if dir_name not in ("AAA", "_", "-", "OK"):
+            location = location + dir_name + "/"
+            create_dir_if_not_exists(location)
         dir_content = self._get_dir_content(dir_id)
         scraped, total = 0, 0
-        print(f"Downloading directory with the id = {dir_id} to location {location}...")
         for item in dir_content:
             file_id, filename, mime_type = _get_file_props(item)
             file_path = location + filename
             if mime_type == "application/vnd.google-apps.folder":
                 self._scrape_resources_dir(file_id, location, filename)
             elif (
-                    mime_type != "application/vnd.google-apps.folder"
-                    and file_path not in self._resources
+                mime_type != "application/vnd.google-apps.folder"
+                and file_path not in self._resources
             ):
                 total = total + 1
                 try:
-                    data = self._parse_file_name(file_path)
+                    data = self._parse_file_name(location, dir_name, filename)
                 except ValueError as e:
                     log_exception(e, "LearningResource")
                     continue
@@ -141,9 +143,7 @@ class DriveScrapper:
                     if resource is not None:
                         self._delete_file(file_id)
                         store_obj_in_es_index(resource)
-                    print(
-                        f"{file_id} {filename} {mime_type} ({scraped}/{total})"
-                    )
+                    print(f"{file_id} {filename} {mime_type} ({scraped}/{total})")
 
     def _scrape_urls_file(self, file_id, location, filename, mime_type):
         unsaved_lines = []
@@ -164,8 +164,11 @@ class DriveScrapper:
                     unsaved_lines.append(line)
                     log_exception(e, "LearningResource")
                     continue
-            if len(unsaved_lines) > 0 and self._urls_file is not None:
-                self._update_urls_file(unsaved_lines, location, filename, file_id)
+            if self._urls_file is not None:
+                self._update_urls_file(self._create_new_urls_file_content(unsaved_lines), location, filename, file_id)
+
+    def _create_new_urls_file_content(self, urls):
+        return ['\n'] if len(urls) == 0 else urls
 
     def _update_urls_file(self, resources, location, filename, file_id):
         create_dir_if_not_exists(location + "tmp/")
@@ -209,29 +212,18 @@ class DriveScrapper:
             "material_type": MaterialType.URL,
         }
 
-    def _parse_file_name(self, filepath):
-        params = filepath.split("/")
-        if len(params) < 3:
-            raise ValueError(
-                "Wrong resource parameters format. Some params are missing!"
-            )
-        (
-            resource_type,
-            pattern,
-            filename,
-        ) = params[-3:]
+    def _parse_file_name(self, location, pattern, filename):
+        resource_type = location.split("/")[-2]
         name = determine_resource_name_by_filename(filename, pattern)
         resource_type = resource_type.lower()
-        if resource_type[-1] == "s":
-            resource_type = resource_type[:-1]
         category = determine_category_name_by_filename(name, self._categories)
         if category is None:
             raise ValueError("There is no resource category with such a name")
         return {
             "name": name,
-            "resource": filepath,
+            "resource": location + filename,
             "resource_category": category,
-            "resource_type": ResourceType.str_to_enum(resource_type),
+            "resource_type": ResourceType.str_to_enum(resource_type[:-1]),
             "material_type": MaterialType.FILE,
         }
 
@@ -249,10 +241,10 @@ class DriveScrapper:
         try:
             resource_obj = self._resource_dao.create(**resource)
         except (
-                db.exc.InvalidRequestError,
-                db.exc.IntegrityError,
-                db.exc.ProgrammingError,
-                db.exc.DataError,
+            db.exc.InvalidRequestError,
+            db.exc.IntegrityError,
+            db.exc.ProgrammingError,
+            db.exc.DataError,
         ) as e:
             log_exception(e, "Learning resource")
         finally:
@@ -264,13 +256,13 @@ class DriveScrapper:
         while True:
             files = (
                 self._service.files()
-                    .list(
+                .list(
                     q=f"'{dir_id}' in parents",
                     fields="nextPageToken, files(id, name, mimeType, shortcutDetails)",
                     pageToken=page_token,
                     pageSize=1000,
                 )
-                    .execute()
+                .execute()
             )
             result.extend(files["files"])
             page_token = files.get("nextPageToken")

@@ -4,8 +4,9 @@ import logging
 from datetime import datetime
 
 from utils.common import log_exception, log
-from config.config import GOOGLE_DISK_DIR_ID
-from config.constants import RESOURCES_LOCATION, RESOURCES_DIR_NAME
+from config.config import GOOGLE_DISK_DIR_ID, RESOURCES_LOCATION
+from config.constants import RESOURCES_DIR_NAME
+
 
 LOCAL_FILE_PATH = path.dirname(path.realpath("__file__"))
 # logger

@@ -1,3 +1,5 @@
+
+
 COMMON_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                   "Chrome/81.0.4044.138 Safari/537.36",
@@ -36,9 +38,6 @@ COURSE_DATA = {
     "suffix": "?fields[course]=primary_category,primary_subcategory,context_info,locale",
 }
 
-# media folder - location for posters storage
-COURSES_MEDIA_DIR_PATH = "images/courses/"
-
 # length constants
 COURSE_DESCRIPTION_LEN = 6000
 COURSE_OBJECTIVES_LEN = 1200
@@ -63,7 +62,6 @@ SUFFIX_PATTERN = []
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 CREDENTIALS_PICKLE_FILEPATH = "token.pickle"
 
-# resources location
-RESOURCES_LOCATION = "../learning-resources/"
+# resources data
 RESOURCES_DIR_NAME = "files"
 

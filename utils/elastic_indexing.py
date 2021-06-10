@@ -44,7 +44,6 @@ def _map_course_object_to_es_record(course):
         "subcategory": course.subcategory.id if course.subcategory else None,
         "language": course.language.id if course.language else None,
         "poster": course.poster_path,
-        "original_poster_url": course.original_poster_url,
         "updated_at": course.updated_at.strftime("%Y-%m-%d %H:%M:%S")
     }
 
@@ -55,8 +54,8 @@ def _map_learning_resource_object_to_es_record(learning_resource):
         "doc_id": learning_resource.id,
         "name": learning_resource.name,
         "resource": learning_resource.resource,
-        "category": learning_resource.resource_category.id if learning_resource.resource_category else None,  # impossible case
-        "material_type": str(learning_resource.material_type),
-        "resource_type": str(learning_resource.resource_type),
+        "category": learning_resource.resource_category.id if learning_resource.resource_category else None,
+        "material_type": learning_resource.material_type.name,
+        "resource_type": learning_resource.resource_type.name.capitalize(),
         "updated_at": learning_resource.updated_at.strftime("%Y-%m-%d %H:%M:%S")
     }

@@ -14,7 +14,7 @@ if __name__ == "__main__":
         "books",
         "scripts",
         "images",
-        "projects"
+        #"projects"
         #"blogs_articles",
         #"tutorials",
         #"websites",

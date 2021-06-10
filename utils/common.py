@@ -4,22 +4,23 @@ from os import path, sep
 from json import load
 from requests import get
 
-from config.constants import COURSE_DATA, LANDING_COMPONENTS, COURSES_MEDIA_DIR_PATH
+from config.config import MEDIA_DIR_PATH
+from config.constants import COURSE_DATA, LANDING_COMPONENTS
+
 from database.sqlalchemy_extension import db
 
-LOCAL_FILE_PATH = path.dirname(path.realpath("__file__"))
 
-
-def download_image(url, type="poster"):
+def download_image(url, image_type="course"):
     if url is None:
         raise ValueError("The url is not valid.")
-    if type not in ("poster", "instructor"):
+    if image_type not in ("course", "instructor"):
         raise ValueError("The image target type is not valid.")
     filename = url.split("/")[-1].split("?")[0]
     filepath = path.join(
-        LOCAL_FILE_PATH, COURSES_MEDIA_DIR_PATH + type + "s" + sep + filename
+        MEDIA_DIR_PATH + image_type + "s" + sep + filename
     )
-    return _download_image(url, filepath)
+    _download_image(url, filepath)
+    return filename
 
 
 def _download_image(url, destination):
