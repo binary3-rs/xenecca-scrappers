@@ -141,3 +141,6 @@ backup
 
 # Pycharm settings
 .idea
+
+# Google Drive API credentials
+creds.json

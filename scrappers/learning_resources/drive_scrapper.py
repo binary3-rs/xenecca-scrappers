@@ -21,7 +21,7 @@ from utils.learning_resource_categorizer import (
 )
 from utils.elastic_indexing import store_obj_in_es_index
 
-GOOGLE_DRIVE_CREDENTIALS_PATH = "scrappers/learning_resources/creds.json"
+GOOGLE_DRIVE_CREDENTIALS_PATH = "creds.json"
 
 
 def _get_file_props(file):
