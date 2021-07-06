@@ -143,7 +143,11 @@ class FreeWebCartScrapper(BaseCourseScrapper):
         img_element = find_content_on_page(content, "div", "stm_lms_course__image")
         if len(img_element) > 0:
             try:
-                return img_element[0].img.attrs.get("src", None)
+                image_attrs = img_element[0].img.attrs
+                img_src = image_attrs.get("src", None)
+                if img_src is None or "data:image":
+                    img_src = image_attrs.get("data-src", None)
+                return img_src
             except AttributeError:
                 return None
         return None
