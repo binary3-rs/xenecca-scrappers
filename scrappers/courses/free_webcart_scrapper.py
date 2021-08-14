@@ -94,18 +94,16 @@ class FreeWebCartScrapper(BaseCourseScrapper):
             description, ["div", "p", "h1", "h2", "h3", "h4", "h5", "h6", "strong"]
         )
         data = []
-        clean_pattern = compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
         for block in blocks:
-            raw_content = "".join([str(subblock) for subblock in block])
-            clean_text = sub(clean_pattern, "", raw_content).strip()
+            clean_text = clean_html_tags(block)
             if (
-                len(clean_text) == 0
-                or "adsbygoogle" in clean_text
-                or "function(v,d,o,ai)" in clean_text
+                    len(clean_text) == 0
+                    or "adsbygoogle" in clean_text
+                    or "function(v,d,o,ai)" in clean_text
             ):
                 continue
             data.append(clean_text)
-        return data
+        return "\n".join(data)
 
     @classmethod
     def _find_course_headline(cls, content):
@@ -151,3 +149,47 @@ class FreeWebCartScrapper(BaseCourseScrapper):
             except AttributeError:
                 return None
         return None
+
+
+def clean_html_tags(block):
+    clean_pattern = compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
+    raw_content = "".join([str(subblock.strip()) for subblock in block])
+    text_with_mapped_tags = map_text_style_tags(raw_content)
+    clean_text = sub(clean_pattern, "", text_with_mapped_tags).strip()
+    return map_text_style_tags(clean_text, True)
+
+
+def map_text_style_tags(text, reverse_mapping=False):
+    text_style_map = {
+        "<strong>": "--!!-STRONG-!!--",
+        "</strong>": "--!!-ESTRONG-!!--",
+        "<em>": "--!!-EM-!!--",
+        "</em>": "--!!-EEM-!!--",
+        "<b>": "--!!-B-!!--",
+        "</b>": "--!!-EB-!!--",
+        "<i>": "--!!-I-!!--",
+        "</i>": "--!!-EI-!!--",
+        "<u>": "--!!-U-!!--",
+        "</u>": "--!!-EU-!!--",
+        "<tt>": "--!!-TT-!!--",
+        "</tt>": "--!!-ETT-!!--",
+        "<big>": "--!!-BIG-!!--",
+        "</big>": "--!!-EBIG-!!--",
+        "<small>": "--!!-SMALL-!!--",
+        "</small>": "--!!-ESMALL-!!--",
+        "<sub>": "--!!-SUB-!!--",
+        "</sub>": "--!!-ESUB-!!--",
+        "<sup>": "--!!-SUP-!!--",
+        "</sup>": "--!!-ESUP-!!--",
+        "<br>": "--!!-BR-!!--",
+        "</br>": "--!!-EBR-!!--",
+        "<hr>": "--!!-HR-!!--",
+        "</hr>": "--!!-EHR-!!--",
+    }
+    if reverse_mapping:
+        char_map = {v: k for k, v in text_style_map.items()}
+    else:
+        char_map = text_style_map
+    for element in char_map:
+        text = text.replace(element, char_map.get(element, element))
+    return text

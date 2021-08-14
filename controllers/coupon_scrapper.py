@@ -189,7 +189,7 @@ class ScrapperRunner:
     def update_caches(self, course):
         put_if_not_null(self._courses, course.title if course else None, course)
         put_if_not_null(self._slugs, course.slug if course else None, course)
-        #put_if_not_null(self._course_urls, course.udemy_url if course else None, course)
+        # put_if_not_null(self._course_urls, course.udemy_url if course else None, course)
         put_if_not_null(
             self._languages,
             course.language.name if course.language else None,

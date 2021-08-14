@@ -29,6 +29,15 @@ class CourseDAO:
     def find_all(self):
         return self._session.query(Course).all()
 
+    def save_all(self, courses) -> None:
+        """Add course to database"""
+        try:
+            self._session.bulk_save_objects(courses)
+            self._session.commit()
+        except Exception as e:
+            self._session.rollback()
+            raise e
+
     def save(self, course) -> "Course":
         """Add course to database"""
         try:

@@ -3,7 +3,7 @@ from logging import debug, error, info, warning
 from os import path, sep
 from json import load
 from requests import get
-
+from re import split
 from config.config import MEDIA_DIR_PATH
 from config.constants import COURSE_DATA, LANDING_COMPONENTS
 
@@ -93,7 +93,7 @@ def try_save(fn, data, default_value=None, message_subject=""):
 
 def log_exception(e, message_subject=None):
     if isinstance(e, db.exc.InvalidRequestError) or isinstance(
-        e, db.exc.IntegrityError
+            e, db.exc.IntegrityError
     ):
         log_with_timestamp(
             f"ERROR: {message_subject} cannot be saved. Data integrity error: {e}.",
@@ -125,13 +125,14 @@ def load_from_json(json_path):
 
 
 def trim_to_len(data, trim_len):
-    return f"{data[:trim_len-3]}..." if (data is not None and len(data) > trim_len) else data
+    return f"{data[:trim_len - 3]}..." if (data is not None and len(data) > trim_len) else data
 
 
 def udemy_url_to_slug(url):
     if url == "#":
         return None
     try:
-        return url.split('course/')[1].split('/?')[0]
+        url = url.split('course/')[1]
+        return f'{split("/?|/", url)[0]}'
     except IndexError:
         return None
