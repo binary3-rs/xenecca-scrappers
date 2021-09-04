@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from database.models.category import Category
+from database.models.course.category import Category
 
-from ..sqlalchemy_extension import *
+from database.sqlalchemy_extension import *
 
 
 class Subcategory(Base):

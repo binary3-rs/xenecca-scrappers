@@ -10,7 +10,7 @@ from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from config.constants import SCOPES, CREDENTIALS_PICKLE_FILEPATH
 from dao.learning_resource import LearningResourceDAO
 from dao.learning_resource_category_dao import LearningResourceCategoryDAO
-from database.models.learning_resource import MaterialType, ResourceType
+from database.models.learningresource.learning_resource import MaterialType, ResourceType
 from database.sqlalchemy_extension import db
 from utils.common import log_exception
 from utils.credentials import obtain_credentials, refresh_token_if_expired

@@ -52,11 +52,16 @@ class ScrapperRunner:
         courses_to_scrape = self._filter_present_courses(courses)
         courses_to_scrape.reverse()
         for course_data in courses_to_scrape:
-            course_data = {
-                **course_data,
-                **scrapper.find_all_course_details(course_data.get("host_url")),
-            }
-            if course_data["slug"] in self._slugs or course_data["slug"] is None:
+            try:
+                course_data = {
+                    **course_data,
+                    **scrapper.find_all_course_details(course_data.get("host_url")),
+                }
+            except Exception as e:
+                log_exception(e)
+                continue
+            slug = course_data.get("slug")
+            if slug is None or slug in self._slugs:
                 continue
             num_of_scrapped_courses += 1
             course = self._courses.get(course_data["title"])

@@ -1,7 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from ..sqlalchemy_extension import *
-#from sqlalchemy.types import Enum
+from database.sqlalchemy_extension import *
 
 
 class LearningResourceDomain(Enum):

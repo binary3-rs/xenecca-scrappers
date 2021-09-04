@@ -6,9 +6,9 @@ from config.constants import (
     COURSE_DESCRIPTION_LEN,
     COURSE_OBJECTIVES_LEN,
 )
-from scrappers.courses.base_course_scrapper import BaseCourseScrapper
-from scrappers.scrapper import find_content_on_page, get_page_content
-from utils.common import trim_to_len, udemy_url_to_slug
+from scrappers.base_scrapper import find_content_on_page, get_page_content
+from scrappers.course.base_course_scrapper import BaseCourseScrapper
+from utils.common import trim_to_len, udemy_url_to_slug, log_exception
 
 
 class FreeWebCartScrapper(BaseCourseScrapper):
@@ -55,6 +55,7 @@ class FreeWebCartScrapper(BaseCourseScrapper):
             "host_url": url,
             "slug": udemy_url_to_slug(udemy_url)
         }
+
 
     def _find_course_url(cls, course_item):
         title_url_element = find_content_on_page(course_item, "h2", "grid-tit")[0]
@@ -153,7 +154,15 @@ class FreeWebCartScrapper(BaseCourseScrapper):
 
 def clean_html_tags(block):
     clean_pattern = compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
-    raw_content = "".join([str(subblock.strip()) for subblock in block])
+    cleaned_blocks = []
+    for subblock in block:
+        if not hasattr(subblock, "contents") or len(subblock.contents) == 0:
+            continue
+        item = subblock.contents[0]
+        if item is None or item.name in (None, 'img',) or item.contents in (None, []):
+            continue
+        cleaned_blocks.append(item.contents[0].strip())
+    raw_content = "".join(cleaned_blocks)
     text_with_mapped_tags = map_text_style_tags(raw_content)
     clean_text = sub(clean_pattern, "", text_with_mapped_tags).strip()
     return map_text_style_tags(clean_text, True)

@@ -2,8 +2,8 @@ from os import path, sep
 
 from utils.common import load_from_json
 from config.constants import CATEGORIES_JSON_PATH
-PARENT_FILE_PATH = path.dirname(path.realpath("__file__"))
 
+PARENT_FILE_PATH = path.dirname(path.realpath("__file__"))
 categories = load_from_json(f'{PARENT_FILE_PATH}{sep}{CATEGORIES_JSON_PATH}')
 
 
@@ -26,5 +26,3 @@ def find_category_data(data):
 def find_categories_by_technology(data):
     # TODO: implement determination of the category/subcategory by technology
     return None, None
-
-

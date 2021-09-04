@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from database.models.learning_resource_category import LearningResourceCategory
-from ..sqlalchemy_extension import *
+from database.models.learningresource.learning_resource_category import LearningResourceCategory
+from database.sqlalchemy_extension import *
 from enum import Enum
 
 
@@ -16,7 +16,7 @@ class ResourceType(Enum):
     SCRIPT = 3
     IMAGE = 4
     BLOG_OR_ARTICLE = 5
-    TUTORIAL = 6
+    TUTORIAL_OR_COURSE = 6
     WEBSITE = 7
     PODCAST = 8
     COLLECTION = 9

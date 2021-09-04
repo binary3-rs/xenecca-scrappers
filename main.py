@@ -3,8 +3,8 @@ from datetime import datetime
 import urllib3
 
 from controllers.coupon_scrapper import ScrapperRunner
-from scrappers.courses.free_webcart_scrapper import FreeWebCartScrapper
-from scrappers.courses.smartybro_scrapper import SmartyBroScrapper
+from scrappers.course.free_webcart_scrapper import FreeWebCartScrapper
+from scrappers.course.smartybro_scrapper import SmartyBroScrapper
 from utils.common import log, log_exception, log_with_timestamp
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

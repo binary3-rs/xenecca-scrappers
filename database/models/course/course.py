@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from database.models.category import Category
-from database.models.subcategory import Subcategory
+from database.models.course.category import Category
+from database.models.course.subcategory import Subcategory
 
-from ..sqlalchemy_extension import Base, db, relationship
+from database.sqlalchemy_extension import Base, db, relationship
 from .language import Language
 
 

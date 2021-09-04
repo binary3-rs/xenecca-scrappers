@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from ..sqlalchemy_extension import *
+from database.sqlalchemy_extension import *
 
 
 class Category(Base):

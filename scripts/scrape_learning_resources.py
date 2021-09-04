@@ -1,5 +1,5 @@
 from os import path
-from scrappers.learning_resources.drive_scrapper import DriveScrapper
+from scrappers.learning_resource.drive_scrapper import DriveScrapper
 import logging
 from datetime import datetime
 

@@ -37,6 +37,8 @@ def find_content_on_page(content, element, attrs={}) -> List:
     :param attrs: additional params that define parsing - id, class, other attrs
     :return: List of pattern ocurrences
     """
+    if attrs is None:
+        attrs = {}
     return content.find_all(element, attrs) if content else None
 
 

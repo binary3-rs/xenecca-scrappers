@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Dict
 
-from ..sqlalchemy_extension import *
-from ..sqlalchemy_extension import db
+from database.sqlalchemy_extension import *
+from database.sqlalchemy_extension import db
 
 
 class Language(Base):

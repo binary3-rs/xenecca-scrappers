@@ -1,4 +1,4 @@
-from scrappers.scrapper import get_page_content
+from scrappers.base_scrapper import get_page_content
 
 
 class BaseCourseScrapper:

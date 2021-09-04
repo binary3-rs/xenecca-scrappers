@@ -8,8 +8,8 @@ from config.constants import (
     SMARTY_BRO_BASE_URL,
     COURSE_HEADLINE_LEN,
 )
-from scrappers.courses.base_course_scrapper import BaseCourseScrapper
-from scrappers.scrapper import find_content_on_page, get_page_content
+from scrappers.course.base_course_scrapper import BaseCourseScrapper
+from scrappers.base_scrapper import find_content_on_page, get_page_content
 from utils.category_and_topic_mapping import find_category_data
 from utils.common import log, trim_to_len, udemy_url_to_slug
 
@@ -63,11 +63,14 @@ class SmartyBroScrapper(BaseCourseScrapper):
     @classmethod
     def _find_course_details(cls, url):
         content = get_page_content(url)
-        udemy_url = cls._find_course_udemy_url(content)
-        objectives = cls._find_course_objectives(content)
-        requirements = cls._find_course_requirements(content)
-        description = cls._find_course_description(content)
-        poster = cls._find_course_poster(content)
+        try:
+            udemy_url = cls._find_course_udemy_url(content)
+            objectives = cls._find_course_objectives(content)
+            requirements = cls._find_course_requirements(content)
+            description = cls._find_course_description(content)
+            poster = cls._find_course_poster(content)
+        except Exception:
+            return {}
         if udemy_url is None:
             return {}
         return {

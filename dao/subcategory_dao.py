@@ -1,4 +1,4 @@
-from database.models.subcategory import Subcategory
+from database.models.course.subcategory import Subcategory
 from database.sqlalchemy_extension import session
 
 

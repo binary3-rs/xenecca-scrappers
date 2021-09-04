@@ -1,4 +1,4 @@
-from scrappers.learning_resources.drive_scrapper import DriveScrapper
+from scrappers.learning_resource.drive_scrapper import DriveScrapper
 
 ds = DriveScrapper()
 
@@ -10,16 +10,10 @@ file_metadata = {
 }
 if __name__ == "__main__":
     for dir_name in (
-        "cheatsheets",
-        "books",
-        "scripts",
-        "images",
-        #"projects"
-        #"blogs_articles",
-        #"tutorials",
-        #"websites",
-        #"podcasts",
-        #"collections",
+            "cheatsheets",
+            "books",
+            "scripts",
+            "images",
     ):
         file_metadata["name"] = dir_name
         file_metadata["parents"] = ["1dqtqcHMYsbEAiZ6_Zb1vJSNsSihZMc_S"]

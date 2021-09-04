@@ -1,4 +1,4 @@
-from database.models.learning_resource import LearningResource
+from database.models.learningresource.learning_resource import LearningResource
 from database.sqlalchemy_extension import session
 
 

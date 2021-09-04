@@ -1,4 +1,4 @@
-from database.models.course import Course
+from database.models.course.course import Course
 from database.sqlalchemy_extension import session
 
 

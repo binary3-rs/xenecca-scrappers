@@ -1,4 +1,4 @@
-from database.models.language import Language
+from database.models.course.language import Language
 from database.sqlalchemy_extension import session
 
 
