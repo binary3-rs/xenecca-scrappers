@@ -13,13 +13,10 @@ class BaseCourseScrapper:
             courses.update(cls.find_host_urls_in_page_content(page_content))
         return courses
 
+    # TODO: check if this could be thrown away - just find_course_details instead
     @classmethod
     def find_all_course_details(cls, url):
         return cls._find_course_details(url)
-
-    @classmethod
-    def find_all_courses_details(cls, args):
-        pass
 
     @classmethod
     def _find_course_details(cls, url):

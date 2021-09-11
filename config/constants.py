@@ -27,6 +27,9 @@ COURSE_INCENTIVES_AND_PRICE = {
 SMARTY_BRO_BASE_URL = "https://smartybro.com/page/"
 FREEWEB_CART_BASE_URL = "https://www.freewebcart.com/course/"
 
+SCHOLARSHIP_TRACK_URL = "https://scholarshiptrack.org/scholarships-opportunities-board/"
+
+
 LANDING_COMPONENTS = {
     "prefix": "https://www.udemy.com/api-2.0/course-landing-components/",
     "suffix": "/me/?components=curriculum,price_text,reviews,incentives,instructor_bio,"

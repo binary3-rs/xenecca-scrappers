@@ -134,5 +134,7 @@ def udemy_url_to_slug(url):
     try:
         url = url.split('course/')[1]
         return f'{split("/?|/", url)[0]}'
-    except IndexError:
+    # TODO: check where null slug occurs
+    except IndexError as e:
+        log_with_timestamp(e)
         return None
