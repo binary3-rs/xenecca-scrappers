@@ -1,7 +1,7 @@
 # elastic search methods
 from json import dumps, loads
 
-from requests import put
+from requests import put, delete
 
 from config.config import COURSES_ES_ENDPOINT, LEARNING_RESOURCES_ES_ENDPOINT
 from database.models.course.course import Course
@@ -31,6 +31,22 @@ def _store_es_record(obj_id, record, record_type="course"):
             raise ValueError(res["error"])
     except Exception as e:
         log_with_timestamp(f"Creating a record failed. Error message = {e}.")
+
+
+def delete_courses_from_es(ids):
+    for _id in ids:
+        log_with_timestamp(f"Deleting record with id = {_id} from ES")
+        _delete_course_es_record(_id)
+
+
+def _delete_course_es_record(obj_id):
+    try:
+        res = delete(
+            f"{COURSES_ES_ENDPOINT}{obj_id}")
+        if "error" in res:
+            raise ValueError(res["error"])
+    except Exception as e:
+        log_with_timestamp(f"Delete a record failed. Error message = {e}.")
 
 
 def _map_course_object_to_es_record(course):

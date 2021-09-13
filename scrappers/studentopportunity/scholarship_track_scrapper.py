@@ -39,7 +39,7 @@ def _extract_opporutunites_from_items(scholarship_item_list):
 
 
 class ScholarshipTrackScrapper:
-    SOURCE = "ScholarshipTrack"
+    SOURCE = "https://scholarshiptrack.org/"
 
     def __init__(self):
         self._student_opp_dao = StudentOpportunityDao()

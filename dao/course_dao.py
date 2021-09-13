@@ -48,6 +48,15 @@ class CourseDAO:
             self._session.rollback()
             raise e
 
+    # TODO: solve this
+    def delete_first_k(self, k):
+        """Delete first k elements"""
+        course_ids = self._session.query(Course.id).order_by(Course.id).limit(k).subquery()
+        self._session.query(Course).filter(Course.id.in_(course_ids)).delete(synchronize_session='fetch')
+        result = self._session.query(Course.id).filter(Course.id.in_(course_ids)).all()
+        self._session.commit()
+        return result
+
     def delete(self, course) -> None:
         """Deletes course from the database."""
         self._session.delete(course)

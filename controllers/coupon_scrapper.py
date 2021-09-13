@@ -8,7 +8,7 @@ from dao.language_dao import LanguageDAO
 from dao.subcategory_dao import SubcategoryDAO
 
 from utils.file import delete_file
-from utils.elastic_indexing import store_obj_in_es_index
+from utils.elastic_indexing import store_obj_in_es_index, delete_courses_from_es
 from utils.common import (
     download_image,
     load_data_into_dict,
@@ -69,6 +69,11 @@ class ScrapperRunner:
             course = self._save_scraped_data(course, course_data)
             num_of_saved_courses = num_of_saved_courses + (course is not None)
         return num_of_scrapped_courses, num_of_saved_courses
+
+    def delete_first_k_courses(self, k):
+        log_with_timestamp(f"Deleting {k} courses from data storage...")
+        course_ids = self.course_dao.delete_first_k(k)
+        delete_courses_from_es([course_id[0] for course_id in course_ids])
 
     def _save_scraped_data(self, course, course_data):
         course_is_new_or_updatable = self._is_new_or_non_recent_course(course)
