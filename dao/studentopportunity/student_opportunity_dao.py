@@ -22,9 +22,9 @@ class StudentOpportunityDao:
             result = self.save(student_opportunity)
         return result
 
-    def delete_by_source(self, source):
+    def delete_by_source(self, source_website):
         """Delete all student opportunities by source"""
-        self._session.query(StudentOpportunity).filter(StudentOpportunity.source == source).delete()
+        self._session.query(StudentOpportunity).filter(StudentOpportunity.source_website == source_website).delete()
 
     def save_all(self, opportunities) -> None:
         """Add student opportunities to database"""

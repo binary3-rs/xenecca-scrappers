@@ -39,7 +39,7 @@ def _extract_opporutunites_from_items(scholarship_item_list):
 
 
 class ScholarshipTrackScrapper:
-    SOURCE = "https://scholarshiptrack.org/"
+    SOURCE_WEBSITE = "https://scholarshiptrack.org/"
 
     def __init__(self):
         self._student_opp_dao = StudentOpportunityDao()
@@ -50,7 +50,7 @@ class ScholarshipTrackScrapper:
         return {opportunity.origin_url for opportunity in self._student_opp_dao.find_all()}
 
     def delete_old_scrape_results(self):
-        self._student_opp_dao.delete_by_source(ScholarshipTrackScrapper.SOURCE)
+        self._student_opp_dao.delete_by_source(ScholarshipTrackScrapper.SOURCE_WEBSITE)
 
     def scrape(self):
         if self._page_content is None:
@@ -73,8 +73,8 @@ class ScholarshipTrackScrapper:
                     student_opportunities.append(StudentOpportunity(**{
                         "id": uuid.uuid4(),
                         "title": opp_name,
-                        "type": scholarship_type_map[opp_type],
+                        "opportunity_type": scholarship_type_map[opp_type],
                         "origin_url": opp_url,
-                        "source": ScholarshipTrackScrapper.SOURCE,
+                        "source_website": ScholarshipTrackScrapper.SOURCE_WEBSITE,
                     }))
         return student_opportunities
